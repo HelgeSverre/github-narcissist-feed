@@ -29,6 +29,7 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 .idea/
+.zed/
 .vscode/*
 !.vscode/extensions.json
 *.swp
@@ -36,3 +37,4 @@ Thumbs.db
 # Agent tooling: local settings and scratch
 .claude/settings.local.json
 .amp/in/
+.letta/
