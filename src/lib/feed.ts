@@ -339,6 +339,36 @@ export function bucketStart(d: Date, group: Group, weekStart: 0 | 1) {
   return group === "day" ? startOfDay(d) : group === "week" ? startOfWeek(d, weekStart) : startOfMonth(d);
 }
 
+export interface PagedGroup extends FeedGroup {
+  /** Rows in the whole group, loaded or not, so the header count never grows while scrolling. */
+  total: number;
+}
+
+/**
+ * Infinite-scroll paging over grouped items. Collapsed groups cost nothing (only their header renders), expanded groups
+ * spend `budget` rows in order, and only the last expanded group can be cut short. `more` means rows are left to load.
+ */
+export function pageGroups(
+  groups: FeedGroup[],
+  isCollapsed: (key: number) => boolean,
+  budget: number,
+): { groups: PagedGroup[]; more: boolean } {
+  const out: PagedGroup[] = [];
+  for (const g of groups) {
+    const total = g.items.reduce((a, it) => a + itemCount(it), 0);
+    if (isCollapsed(g.key)) {
+      out.push({ ...g, total });
+      continue;
+    }
+    if (budget <= 0) return { groups: out, more: true };
+    const items = g.items.slice(0, budget);
+    budget -= items.length;
+    out.push({ ...g, items, total });
+    if (items.length < g.items.length) return { groups: out, more: true };
+  }
+  return { groups: out, more: false };
+}
+
 export function groupItems(items: Item[], group: Group, weekStart: 0 | 1): FeedGroup[] {
   const groups: FeedGroup[] = [];
   for (const it of items) {

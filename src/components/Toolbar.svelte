@@ -5,12 +5,11 @@
   import { radiogroup } from "../lib/radiogroup";
   import Icon from "./Icon.svelte";
 
-  const groupKeys = $derived(app.groupKeys);
-  const allCollapsed = $derived(groupKeys.length > 0 && groupKeys.every((k) => app.collapsed.has(k)));
+  const allCollapsed = $derived(app.layout.groupsCollapsed);
   const updated = $derived(app.refreshing ? "Refreshing…" : "Updated " + relative(app.status.lastQuickAt, app.now));
 
   function toggleAll() {
-    app.collapsed = allCollapsed ? new Set() : new Set(groupKeys);
+    app.setGroupsCollapsed(!allCollapsed);
   }
   function refresh() {
     if (app.refreshing) return;

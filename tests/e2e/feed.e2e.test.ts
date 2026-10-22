@@ -6,7 +6,7 @@
  * tests and the rest reuse its data. Needs GITHUB_TOKEN or an authenticated `gh` CLI.
  */
 import type { Page } from "puppeteer-core";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Kind } from "../../src/lib/types";
 import {
   count,
@@ -14,6 +14,7 @@ import {
   fetchViewer,
   githubToken,
   goToFeed,
+  chooseRailPeriod,
   goToSettings,
   launchExtension,
   storeToken,
@@ -188,5 +189,77 @@ describe.skipIf(!token)("feed with a real token (needs GITHUB_TOKEN or an authen
       ["full", 60],
       ["quick", 10],
     ]);
+  });
+
+  describe("collapse all", () => {
+    type Header = { collapsed: boolean; count: string };
+    const headers = (): Promise<Header[]> =>
+      page.$$eval("#col button.day", (bs) =>
+        bs.map((b) => ({ collapsed: b.classList.contains("collapsed"), count: b.querySelector(".dcnt")?.textContent?.trim() ?? "" })),
+      );
+    const toggleAll = async () => {
+      await page.bringToFront();
+      await page.click('#toolbar button[aria-label$="all groups"]');
+    };
+    /** Scrolls to the end until no more rows load; returns the headers. */
+    const scrollToEnd = async () => {
+      for (let i = 0; i < 20 && (await page.$("#col .sentinel")); i++) {
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      return headers();
+    };
+
+    beforeAll(async () => {
+      await goToFeed(page);
+      await chooseRailPeriod(page, "365");
+      await page.waitForSelector("#col .sentinel", { timeout: 10_000 });
+    });
+    afterAll(async () => {
+      await chooseRailPeriod(page, "30");
+    });
+
+    it("keeps header counts stable while more rows load", async () => {
+      const before = await headers();
+      const after = await scrollToEnd();
+      expect(after.length, "more groups after scrolling").toBeGreaterThan(before.length);
+      expect(after.slice(0, before.length).map((h) => h.count)).toEqual(before.map((h) => h.count));
+    });
+
+    it("collapses every group at once and persists the default", async () => {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await toggleAll();
+      const hs = await headers();
+      expect(hs.length).toBeGreaterThan(1);
+      expect(
+        hs.every((h) => h.collapsed),
+        "every group collapsed",
+      ).toBe(true);
+      expect(await page.$("#col .sentinel"), "collapsed groups need no more loading").toBeNull();
+      await vi.waitFor(async () => expect((await ext.syncStorage()).layout?.groupsCollapsed).toBe(true), { timeout: 5_000 });
+    });
+
+    it("keeps a group opened by hand as the only exception", async () => {
+      await page.click("#col button.day");
+      const hs = await headers();
+      expect(hs[0].collapsed).toBe(false);
+      expect(hs.slice(1).every((h) => h.collapsed)).toBe(true);
+    });
+
+    it("after a reload, keeps the default and forgets hand-opened groups", async () => {
+      await page.reload({ waitUntil: "load" });
+      await page.waitForSelector("#col button.day", { timeout: 15_000 });
+      expect((await headers()).every((h) => h.collapsed)).toBe(true);
+    });
+
+    it("expands every group, including ones loaded later", async () => {
+      await toggleAll();
+      expect((await headers()).some((h) => h.collapsed)).toBe(false);
+      const hs = await scrollToEnd();
+      expect(
+        hs.some((h) => h.collapsed),
+        "groups loaded after Expand all are open",
+      ).toBe(false);
+    });
   });
 });

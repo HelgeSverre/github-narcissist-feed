@@ -10,11 +10,11 @@ Every filter, setting and layout choice survives a reload, a browser restart and
 
 Each piece of state belongs to exactly one tier.
 
-| Tier   | Storage                | Contents                                                                                                           | Why                                                                                                     |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Synced | `chrome.storage.sync`  | settings, view filters, layout                                                                                     | Should follow the user. Chrome stores it locally when Chrome sync is off, so no special case is needed. |
-| Device | `chrome.storage.local` | token, events, ledger, owner metadata, people, status, device state                                                | Large, re-fetchable, or secret. The token is never synced.                                              |
-| Tab    | memory only            | search text, repository filter text, collapsed day groups, expanded stacks, rows shown, open popover, current view | Transient. A new tab opening on yesterday's search would hide data; day-group keys go stale every day.  |
+| Tier   | Storage                | Contents                                                                                                                                                                   | Why                                                                                                     |
+| ------ | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Synced | `chrome.storage.sync`  | settings, view filters, layout                                                                                                                                             | Should follow the user. Chrome stores it locally when Chrome sync is off, so no special case is needed. |
+| Device | `chrome.storage.local` | token, events, ledger, owner metadata, people, status, device state                                                                                                        | Large, re-fetchable, or secret. The token is never synced.                                              |
+| Tab    | memory only            | search text, repository filter text, day groups opened or closed by hand (exceptions to `layout.groupsCollapsed`), expanded stacks, rows shown, open popover, current view | Transient. A new tab opening on yesterday's search would hide data; day-group keys go stale every day.  |
 
 ### Synced keys
 
@@ -42,6 +42,7 @@ interface LayoutPrefs {
   allRepos: boolean; // "Show all N" in Repositories
   trendOrder: TrendKind[]; // permutation of ["star","fork","issue","pr"]
   trendClosed: TrendKind[];
+  groupsCollapsed: boolean; // feed groups start collapsed; a default that also applies to groups loaded later
 }
 ```
 

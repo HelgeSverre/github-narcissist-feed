@@ -42,6 +42,8 @@ export interface LayoutPrefs {
   /** Always a full permutation of TREND_KINDS */
   trendOrder: TrendKind[];
   trendClosed: TrendKind[];
+  /** Feed day/week/month groups start collapsed. A default, not a snapshot: groups loaded later follow it too. */
+  groupsCollapsed: boolean;
 }
 
 export interface Prefs {
@@ -67,6 +69,7 @@ export const DEFAULT_LAYOUT: LayoutPrefs = {
   allRepos: false,
   trendOrder: [...TREND_KINDS],
   trendClosed: [],
+  groupsCollapsed: false,
 };
 
 export { DEFAULT_SETTINGS };
@@ -171,6 +174,7 @@ function sanitizeLayout(raw: unknown): LayoutPrefs {
     allRepos: bool(r.allRepos, DEFAULT_LAYOUT.allRepos),
     trendOrder,
     trendClosed: members(r.trendClosed, TREND_KINDS),
+    groupsCollapsed: bool(r.groupsCollapsed, DEFAULT_LAYOUT.groupsCollapsed),
   };
 }
 

@@ -87,6 +87,7 @@ describe("a profile with schema-1 data", () => {
       allRepos: false,
       trendOrder: ["pr", "star", "fork", "issue"],
       trendClosed: ["fork"],
+      groupsCollapsed: false,
     });
   });
 

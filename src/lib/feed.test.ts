@@ -9,6 +9,7 @@ import {
   isStack,
   isTypeStack,
   itemCount,
+  pageGroups,
   kindIcon,
   ownerOf,
   periodName,
@@ -23,6 +24,7 @@ import {
   unitFor,
   verbClass,
   verbText,
+  type FeedGroup,
   type FilterState,
   type Item,
   type Single,
@@ -1009,5 +1011,70 @@ describe("bucketList", () => {
 
   it("is empty when the earliest time is in the future", () => {
     expect(bucketList("all", "day", 1, NOW, NOW.getTime() + 864e5 * 3)).toEqual([]);
+  });
+});
+
+describe("pageGroups", () => {
+  /** A group of `n` single rows keyed `key`. */
+  const group = (key: number, n: number): FeedGroup => ({
+    key,
+    start: new Date(key),
+    items: Array.from({ length: n }, (_, i) => ({ single: makeEvent({ id: `${key}-${i}` }), at: "2026-10-21T10:00:00Z" })),
+  });
+  const shape = (r: ReturnType<typeof pageGroups>) => ({ rows: r.groups.map((g) => [g.key, g.items.length, g.total]), more: r.more });
+  const none = () => false;
+
+  it("spends the budget across expanded groups and cuts only the last one", () => {
+    expect(shape(pageGroups([group(1, 3), group(2, 5), group(3, 4)], none, 6))).toEqual({
+      rows: [
+        [1, 3, 3],
+        [2, 3, 5],
+      ],
+      more: true,
+    });
+  });
+
+  it("reports no more rows when everything fits", () => {
+    expect(shape(pageGroups([group(1, 2), group(2, 2)], none, 10))).toEqual({
+      rows: [
+        [1, 2, 2],
+        [2, 2, 2],
+      ],
+      more: false,
+    });
+  });
+
+  it("stops before an expanded group when the budget is spent exactly", () => {
+    expect(shape(pageGroups([group(1, 4), group(2, 4)], none, 4))).toEqual({ rows: [[1, 4, 4]], more: true });
+  });
+
+  it("shows every collapsed group as a header without spending budget", () => {
+    const all = () => true;
+    const r = pageGroups([group(1, 50), group(2, 50), group(3, 50)], all, 1);
+    expect(shape(r)).toEqual({
+      rows: [
+        [1, 50, 50],
+        [2, 50, 50],
+        [3, 50, 50],
+      ],
+      more: false,
+    });
+  });
+
+  it("mixes collapsed and expanded groups", () => {
+    const collapsed = (k: number) => k !== 2;
+    expect(shape(pageGroups([group(1, 10), group(2, 10), group(3, 10), group(4, 10)], collapsed, 5))).toEqual({
+      rows: [
+        [1, 10, 10],
+        [2, 5, 10],
+      ],
+      more: true,
+    });
+  });
+
+  it("counts a stack as all of its rows in the header total", () => {
+    const g = group(1, 2);
+    g.items.push({ stack: true, key: "k", target: REPO, anchor: 0, at: "2026-10-21T09:00:00Z", items: g.items.slice(0, 2) as Single[] });
+    expect(pageGroups([g], none, 10).groups[0].total).toBe(4);
   });
 });

@@ -36,6 +36,7 @@ const layout = (patch: Partial<import("./prefs").LayoutPrefs> = {}) => ({
   railClosed: [],
   trendOrder: [...p.DEFAULT_LAYOUT.trendOrder],
   trendClosed: [],
+  groupsCollapsed: false,
   ...patch,
 });
 const bytes = (key: string, value: unknown) => new TextEncoder().encode(JSON.stringify(value)).length + key.length;
@@ -79,6 +80,7 @@ describe("defaults", () => {
       allRepos: false,
       trendOrder: ["star", "fork", "issue", "pr"],
       trendClosed: [],
+      groupsCollapsed: false,
     });
   });
 
@@ -325,6 +327,7 @@ describe("sanitize", () => {
         allRepos: true,
         trendOrder: ["pr", "issue", "fork", "star"],
         trendClosed: ["fork", "star"],
+        groupsCollapsed: false,
       };
       expect(p.sanitize("layout", l)).toEqual(l);
     });
@@ -421,6 +424,7 @@ describe("migration schema 1 -> 2", () => {
     allRepos: false,
     trendOrder: ["pr", "star", "fork", "issue"],
     trendClosed: ["fork"],
+    groupsCollapsed: false,
   };
   const { defaultPeriod: _a, defaultGroup: _b, showOwn: _c, showBots: _d, ...kept } = oldSettings;
   /** Schema 1 had no accent; migrated settings get the default. */
@@ -523,6 +527,7 @@ describe("migration schema 1 -> 2", () => {
       allRepos: true,
       trendOrder: ["issue", "pr", "fork", "star"],
       trendClosed: [],
+      groupsCollapsed: false,
     };
     mock.sync.seed({ view: theirView, layout: theirLayout });
     const prefs = await p.loadPrefs();

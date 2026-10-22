@@ -63,11 +63,11 @@ class AppState {
   page = $state<"feed" | "settings">("feed");
   q = $state("");
   rq = $state("");
-  collapsed = $state(new Set<number>());
+  /** Feed groups toggled by hand against layout.groupsCollapsed. Tab-only: the keys are dates and go stale. */
+  groupFlips = $state(new Set<number>());
   expanded = $state(new Set<string>());
   shown = $state(40);
   ownerPop = $state(false);
-  groupKeys = $state<number[]>([]);
 
   me = $derived(this.settings.username || this.status.viewer || "");
   /** True only while a sweep is really running; a flag older than 3 minutes means the worker died. */
@@ -112,7 +112,11 @@ class AppState {
       } else if (key === "view") {
         this.view = value as ViewPrefs;
         this.shown = 40;
-      } else this.layout = value as LayoutPrefs;
+      } else {
+        const layout = value as LayoutPrefs;
+        if (layout.groupsCollapsed !== this.layout.groupsCollapsed) this.groupFlips = new Set();
+        this.layout = layout;
+      }
     });
     onStorage((changes, area) => {
       if (area !== "local") return;
@@ -220,7 +224,19 @@ class AppState {
   toggleTrendClosed(k: TrendKind) {
     this.patchLayout({ trendClosed: flip(this.layout.trendClosed, k) });
   }
+  isGroupCollapsed(key: number) {
+    return this.layout.groupsCollapsed !== this.groupFlips.has(key);
+  }
+  toggleGroup(key: number) {
+    this.groupFlips = this.toggleSet(this.groupFlips, key, !this.groupFlips.has(key));
+  }
+  /** Collapse or expand every group, including ones loaded later; clears per-group exceptions. */
+  setGroupsCollapsed(groupsCollapsed: boolean) {
+    this.groupFlips = new Set();
+    this.patchLayout({ groupsCollapsed });
+  }
   resetLayout() {
+    this.groupFlips = new Set();
     this.layout = freshLayout();
     savePref("layout", this.layout);
   }

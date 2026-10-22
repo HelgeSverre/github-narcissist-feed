@@ -1,6 +1,6 @@
 <script lang="ts">
   import { app, send } from "../lib/app.svelte";
-  import { filterEvents, groupItems, isStack, isTypeStack, itemCount, stackEvents, typeStackGroup } from "../lib/feed";
+  import { filterEvents, groupItems, isStack, isTypeStack, pageGroups, stackEvents, typeStackGroup } from "../lib/feed";
   import { groupLabel } from "../lib/format";
   import Icon from "./Icon.svelte";
   import Row from "./Row.svelte";
@@ -27,16 +27,14 @@
     ),
   );
   const items = $derived(stackEvents(filtered, app.settings));
-  const slice = $derived(items.slice(0, app.shown));
-  const groups = $derived.by(() => {
-    const gs = groupItems(slice, app.view.group, app.settings.weekStart);
+  const allGroups = $derived.by(() => {
+    const gs = groupItems(items, app.view.group, app.settings.weekStart);
     if (app.settings.stack && app.settings.stackScope === "type") for (const g of gs) g.items = typeStackGroup(g.items, g.key);
     return gs;
   });
-  $effect(() => {
-    app.groupKeys = groups.map((g) => g.key);
-  });
-  const more = $derived(app.shown < items.length);
+  const paged = $derived(pageGroups(allGroups, (k) => app.isGroupCollapsed(k), app.shown));
+  const groups = $derived(paged.groups);
+  const more = $derived(paged.more);
   const loadingFirst = $derived(!app.events.length && !!app.refreshing);
 
   function observe(node: HTMLElement) {
@@ -48,9 +46,6 @@
     );
     io.observe(node);
     return { destroy: () => io.disconnect() };
-  }
-  function toggleGroup(key: number) {
-    app.collapsed = app.toggleSet(app.collapsed, key, !app.collapsed.has(key));
   }
 </script>
 
@@ -82,9 +77,9 @@
   <div class="card empty">Nothing matches these filters.</div>
 {:else}
   {#each groups as g (g.key)}
-    {@const c = app.collapsed.has(g.key)}
-    {@const n = g.items.reduce((a, it) => a + itemCount(it), 0)}
-    <button type="button" class="day" class:collapsed={c} aria-expanded={!c} onclick={() => toggleGroup(g.key)}>
+    {@const c = app.isGroupCollapsed(g.key)}
+    {@const n = g.total}
+    <button type="button" class="day" class:collapsed={c} aria-expanded={!c} onclick={() => app.toggleGroup(g.key)}>
       <Icon name="chevron-down" /><span>{groupLabel(g.start, app.view.group, app.settings, app.now)}</span><span class="dcnt">{n}</span>
     </button>
     {#if !c}
