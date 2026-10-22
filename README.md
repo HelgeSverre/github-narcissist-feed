@@ -31,6 +31,10 @@ It covers your own repositories plus any users or organizations you add (for exa
 - **Chrome WebUI look** in light and dark, at default or compact density.
 - **Runs entirely in your browser**: no server, no runtime dependencies, and it only talks to `api.github.com`.
 
+![Narcissist Feed in dark mode: filter rail, day-grouped feed with an expanded stack, and Trends charts](docs/media/screenshot-dark.png)
+
+_Dark mode, last 30 days, with your own activity and bots hidden. One person's pull requests and fork on a single repository are folded into a stack, shown expanded here._
+
 ## Install
 
 The extension is not on the Chrome Web Store yet. Build it and load it unpacked:
@@ -88,6 +92,8 @@ The token is stored in `chrome.storage.local` in your browser profile. It is nev
 | `https://api.github.com/*` | the only host the extension talks to   |
 
 ## Development
+
+Run `just` to list the task recipes (`dev`, `build`, `clean`, `test`, `e2e`, `lint`, `format`, `icons`). They install npm dependencies automatically when `package-lock.json` has changed. The npm scripts below are what they call.
 
 Requires Node 22.18 or newer, because TypeScript scripts run with Node's built-in type stripping.
 
