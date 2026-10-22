@@ -65,7 +65,7 @@ GitHub's GraphQL API has no anonymous mode, so you need a personal access token.
 ## Using it
 
 - **Rail**: activity types, owners, hiding your own activity, hiding bots, period and repositories. The `+` next to owners searches your organizations, the people you follow and all of GitHub. Click a section heading to collapse it. Counts are for the selected period.
-- **Rail from the keyboard**: ↑/↓ move between filters, Home/End jump to the first and last, Space toggles. On a section heading, ← collapses and → expands; ← anywhere in a section goes back to its heading.
+- **Rail from the keyboard**: ↑/↓ move between filters, Home/End jump to the first and last, Space toggles. On a section heading, ← collapses and → expands; ← anywhere in a section goes back to its heading. In Activity, Shift+↑/↓ selects several types and Space toggles them together.
 - **Toolbar**: search (`/` focuses it), group by day, week or month, collapse all groups, refresh, settings.
 - **Rows**: the username links to the profile and the repository name to the repository. The rest of the row opens the item.
 - **Stacking** (Settings → Stacking): folds repeated actions by the same person. _Repository_ scope folds within one repository. _Organization_ also folds across repositories of one owner. _Activity type_ folds everything of one type inside a group. Each scope has its own time window. Click a stack to expand it.

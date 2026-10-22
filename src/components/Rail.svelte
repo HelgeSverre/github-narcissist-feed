@@ -3,6 +3,7 @@
   import { PERIODS, RAIL_KINDS, ownerOf, periodStart } from "../lib/feed";
   import { viewIsFiltered, type RailSection } from "../lib/prefs";
   import { railnav } from "../lib/railnav";
+  import { multiselect } from "../lib/multiselect";
   import Icon from "./Icon.svelte";
   import OwnerPopover from "./OwnerPopover.svelte";
 
@@ -82,7 +83,7 @@
 
 {@render head("activity", "Activity")}
 {#if !closed.has("activity")}
-  <div class="rsec" id="rsec-activity">
+  <div class="rsec" id="rsec-activity" use:multiselect>
     {#each kindsShown as [k, l, i] (k)}
       <label class="frow"
         ><input

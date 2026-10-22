@@ -199,6 +199,11 @@ svg.ic {
   border-radius: 50%;
   flex: none;
 }
+/* Shift+Arrow multi-selection in the Activity list (src/lib/multiselect.ts) */
+.frow.msel,
+.frow.msel:hover {
+  background: var(--accent-bg);
+}
 .frow.active {
   color: var(--accent);
 }
