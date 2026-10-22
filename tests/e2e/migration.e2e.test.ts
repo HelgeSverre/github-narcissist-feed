@@ -81,7 +81,7 @@ describe("a profile with schema-1 data", () => {
 
   it("builds the layout from local ui and repairs trendOrder into a full permutation", async () => {
     const { layout } = await ext.syncStorage();
-    expect({ ...layout, railClosed: [...(layout?.railClosed ?? [])].sort() }).toEqual({
+    expect({ ...layout, railClosed: [...(layout?.railClosed ?? [])].toSorted() }).toEqual({
       railClosed: ["people", "period"],
       allKinds: true,
       allRepos: false,

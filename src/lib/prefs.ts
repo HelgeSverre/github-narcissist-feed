@@ -320,7 +320,7 @@ function handleChanged(changes: Record<string, chrome.storage.StorageChange>, ar
     if (queued.has(key) || next === known.get(key)) continue;
     known.set(key, next);
     if (pendingKeys.has(key)) void clearPending(key); // the page now shows the newer remote value; a stale pending one must not resurrect on load
-    for (const cb of [...listeners]) {
+    for (const cb of Array.from(listeners)) {
       try {
         cb(key, value);
       } catch (e) {
@@ -437,7 +437,7 @@ export async function loadPrefs(): Promise<Prefs> {
   if (local.ui !== undefined && s !== null && (!migrating || migrated)) await retireLegacyUi(local.ui, local.device);
 
   for (const key of toRetry) void enqueue(key, result[key]);
-  await Promise.all([...chains.values()]);
+  await Promise.all(chains.values());
   return result;
 }
 
@@ -462,8 +462,8 @@ export function savePref<K extends PrefKey>(key: K, value: Prefs[K]): void {
 
 /** Write any debounced values now. Safe to call repeatedly. */
 export async function flushPrefs(): Promise<void> {
-  for (const key of [...queued.keys()]) flushKey(key);
-  await Promise.all([...chains.values()]);
+  for (const key of Array.from(queued.keys())) flushKey(key);
+  await Promise.all(chains.values());
 }
 
 /**

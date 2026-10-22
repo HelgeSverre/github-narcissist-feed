@@ -69,7 +69,7 @@ export function diffLedger(
 
 export function prune(events: Record<string, FeedEvent>) {
   const cutoff = Date.now() - EVENT_TTL_DAYS * 864e5;
-  const ids = Object.keys(events).sort((a, b) => (events[a].at < events[b].at ? 1 : -1));
+  const ids = Object.keys(events).toSorted((a, b) => (events[a].at < events[b].at ? 1 : -1));
   ids.forEach((id, i) => {
     if (i >= MAX_EVENTS || Date.parse(events[id].at) < cutoff) delete events[id];
   });

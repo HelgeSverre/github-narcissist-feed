@@ -8,7 +8,7 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import puppeteer, { type Browser, type ElementHandle, type Page, type Target, type WebWorker } from "puppeteer-core";
+import { launch, type Browser, type ElementHandle, type Page, type Target, type WebWorker } from "puppeteer-core";
 import { expect, inject } from "vitest";
 import type { LayoutPrefs, ViewPrefs } from "../../../src/lib/prefs";
 import type { DeviceState, FeedEvent, OwnerMeta, Person, RepoLedger, Settings, Status } from "../../../src/lib/types";
@@ -88,7 +88,7 @@ export class ExtensionSession {
   static async launch(): Promise<ExtensionSession> {
     const dist = inject("extensionDir");
     const userDataDir = await mkdtemp(join(tmpdir(), "github-narcissist-feed-e2e-"));
-    const browser = await puppeteer.launch({
+    const browser = await launch({
       executablePath: inject("chromeExecutable"),
       headless: true,
       userDataDir,

@@ -118,13 +118,15 @@ class AppState {
   }
 
   private setEvents(map: Record<string, FeedEvent>) {
-    this.events = Object.values(map).sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
+    this.events = Object.values(map).toSorted((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
   }
 
   applyTheme() {
     const root = document.documentElement;
-    this.settings.theme === "system" ? root.removeAttribute("data-theme") : root.setAttribute("data-theme", this.settings.theme);
-    this.settings.density === "compact" ? root.setAttribute("data-density", "compact") : root.removeAttribute("data-density");
+    if (this.settings.theme === "system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme", this.settings.theme);
+    if (this.settings.density === "compact") root.setAttribute("data-density", "compact");
+    else root.removeAttribute("data-density");
   }
 
   // ---------- synced writers: replace the object, then hand it to prefs.ts ----------
@@ -201,7 +203,8 @@ class AppState {
   // owners (settings.owners, `on` drives ownersOn)
   toggleSet<T>(set: Set<T>, v: T, on: boolean): Set<T> {
     const n = new Set(set);
-    on ? n.add(v) : n.delete(v);
+    if (on) n.add(v);
+    else n.delete(v);
     return n;
   }
   toggleOwnerOn(login: string, on: boolean) {

@@ -48,7 +48,8 @@
   });
 
   async function pick(login: string, type: "user" | "org", on: boolean) {
-    on ? await app.addOwner(login, type) : await app.removeOwner(login);
+    if (on) await app.addOwner(login, type);
+    else await app.removeOwner(login);
   }
 
   onMount(() => {

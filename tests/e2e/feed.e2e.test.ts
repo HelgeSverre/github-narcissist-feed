@@ -184,7 +184,7 @@ describe.skipIf(!token)("feed with a real token (needs GITHUB_TOKEN or an authen
 
   it("schedules the quick (10 min) and full (60 min) refresh alarms in the service worker", async () => {
     const alarms = await ext.inWorker(async () => (await chrome.alarms.getAll()).map((a) => [a.name, a.periodInMinutes]));
-    expect(alarms.sort()).toEqual([
+    expect(alarms.toSorted()).toEqual([
       ["full", 60],
       ["quick", 10],
     ]);

@@ -41,7 +41,7 @@
   const series = $derived.by(() => {
     const idx = new Map(buckets.map((d, i) => [d.getTime(), i]));
     const s: Record<string, number[]> = {};
-    for (const k of TREND_KINDS) s[k] = new Array(buckets.length).fill(0);
+    for (const k of TREND_KINDS) s[k] = Array.from({ length: buckets.length }, () => 0);
     for (const e of evs) {
       const i = idx.get(floorToUnit(new Date(e.at), unit, app.settings.weekStart).getTime());
       if (i !== undefined && s[e.kind]) s[e.kind][i]++;

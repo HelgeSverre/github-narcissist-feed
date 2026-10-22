@@ -452,7 +452,9 @@ describe("stackEvents", () => {
     makeEvent({ id, kind: "comment", state: "ISSUE", actor: "alice", at: ago(minutes), ...over });
   /** Readable shape of a stacked list: a stack becomes the array of its event ids, a lone event its id. */
   const shape = (items: Item[]) =>
-    items.map((it) => (isStack(it) ? it.items.map((i) => i.single.id) : isTypeStack(it) ? it.items.map((e) => e.id) : it.single.id));
+    items.map((item) =>
+      isStack(item) ? item.items.map((i) => i.single.id) : isTypeStack(item) ? item.items.map((e) => e.id) : item.single.id,
+    );
 
   describe("when not stacking", () => {
     const events = [comment("c1", 0), comment("c2", 5), comment("c3", 10)];
@@ -614,7 +616,7 @@ describe("typeStackGroup", () => {
   const ev = (id: string, kind: Kind) => makeEvent({ id, kind, at: "2026-10-22T10:00:00Z" });
   const sing = (id: string, kind: Kind) => single(ev(id, kind));
   const shapeOf = (items: Item[]) =>
-    items.map((it) => (isTypeStack(it) ? `${it.kind}*${it.items.length}` : isStack(it) ? "stack" : it.single.id));
+    items.map((item) => (isTypeStack(item) ? `${item.kind}*${item.items.length}` : isStack(item) ? "stack" : item.single.id));
 
   it("folds all events of one kind into one row, placed where the kind first appeared", () => {
     const out = typeStackGroup(

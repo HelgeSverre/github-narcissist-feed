@@ -823,6 +823,7 @@ describe("gql", () => {
 
     it("gives up with a rate error after two retries", async () => {
       fetchMock.mockImplementation(async () => status(403, { "retry-after": "1" }));
+      // oxlint-disable-next-line vitest/valid-expect -- awaited below, after the fake timers advance
       const failed = expect(gql(TOKEN, QUERY)).rejects.toMatchObject({ kind: "rate", status: 403 });
       await vi.runAllTimersAsync();
       await failed;
@@ -862,6 +863,7 @@ describe("gql", () => {
 
     it("backs off exponentially (800, 1600, 3200 ms) and then reports a server error", async () => {
       fetchMock.mockImplementation(async () => status(502));
+      // oxlint-disable-next-line vitest/valid-expect -- awaited below, after the fake timers advance
       const failed = expect(gql(TOKEN, QUERY)).rejects.toMatchObject({ kind: "server", status: 502, message: "GitHub returned HTTP 502" });
       await vi.advanceTimersByTimeAsync(800);
       expect(fetchMock).toHaveBeenCalledTimes(2);

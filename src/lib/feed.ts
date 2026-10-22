@@ -224,32 +224,34 @@ export const isStack = (it: Item): it is Stack => (it as Stack).stack === true;
 export const isTypeStack = (it: Item): it is TypeStack => (it as TypeStack).typeStack === true;
 export const flat = (g: Stack) => g.items.map((i) => i.single);
 
+/** One stacking pass: items with the same key within `windowMin` of the group's newest item fold into one stack. */
+function stackPass<T extends { at: string }>(
+  items: T[],
+  keyFn: (it: T) => string,
+  windowMin: number,
+  target: (it: T) => string,
+): (T | { stack: true; key: string; target: string; anchor: number; at: string; items: T[] })[] {
+  const out: { stack: true; key: string; target: string; anchor: number; at: string; items: T[] }[] = [];
+  const open = new Map<string, (typeof out)[number]>();
+  for (const it of items) {
+    const key = keyFn(it);
+    const t = Date.parse(it.at);
+    const g = open.get(key);
+    if (g && g.anchor - t <= windowMin * 60_000) {
+      g.items.push(it);
+      continue;
+    }
+    const ng = { stack: true as const, target: target(it), key, anchor: t, at: it.at, items: [it] };
+    open.set(key, ng);
+    out.push(ng);
+  }
+  return out.map((g) => (g.items.length === 1 ? g.items[0] : g));
+}
+
 export function stackEvents(evs: FeedEvent[], s: Pick<Settings, "stack" | "stackScope" | "stackRepoWindow" | "stackOrgWindow">): Item[] {
   const base: Single[] = evs.map((e) => ({ single: e, at: e.at }));
   if (!s.stack || s.stackScope === "type") return base;
-  const pass = <T extends { at: string }>(
-    items: T[],
-    keyFn: (it: T) => string,
-    windowMin: number,
-    target: (it: T) => string,
-  ): (T | { stack: true; key: string; target: string; anchor: number; at: string; items: T[] })[] => {
-    const out: { stack: true; key: string; target: string; anchor: number; at: string; items: T[] }[] = [];
-    const open = new Map<string, (typeof out)[number]>();
-    for (const it of items) {
-      const key = keyFn(it);
-      const t = Date.parse(it.at);
-      const g = open.get(key);
-      if (g && g.anchor - t <= windowMin * 60_000) {
-        g.items.push(it);
-        continue;
-      }
-      const ng = { stack: true as const, target: target(it), key, anchor: t, at: it.at, items: [it] };
-      open.set(key, ng);
-      out.push(ng);
-    }
-    return out.map((g) => (g.items.length === 1 ? g.items[0] : g));
-  };
-  const byRepo = pass(
+  const byRepo = stackPass(
     base,
     (it) => `${it.single.actor}|${it.single.kind}|${verbClass(it.single)}|${it.single.repo}`,
     s.stackRepoWindow,
@@ -258,7 +260,7 @@ export function stackEvents(evs: FeedEvent[], s: Pick<Settings, "stack" | "stack
   if (s.stackScope !== "org") return byRepo;
   const actorOf = (it: Single | Stack) => (isStack(it) ? it.items[0].single.actor : it.single.actor);
   const orgOf = (it: Single | Stack) => ownerOf(isStack(it) ? it.items[0].single : it.single);
-  const byOrg = pass(byRepo, (it) => `${actorOf(it)}|${orgOf(it)}`, s.stackOrgWindow, orgOf);
+  const byOrg = stackPass(byRepo, (it) => `${actorOf(it)}|${orgOf(it)}`, s.stackOrgWindow, orgOf);
   return byOrg.map((g) => {
     if (!("stack" in g) || !g.stack) return g as Single | Stack;
     const items = (g.items as (Single | Stack)[]).flatMap((i) => (isStack(i) ? i.items : [i]));

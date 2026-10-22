@@ -92,7 +92,7 @@ describe("diffLedger", () => {
     it("records several unstars when several logins disappeared", () => {
       const repo = makeRepoNode({ stargazerCount: 1, stargazers: { edges: [starEdge("alice", "2026-10-01T00:00:00Z")] } });
       const { events } = run(repo, prevLedger({ stars: 3, stargazers: ["alice", "bob", "carol"] }));
-      expect(Object.keys(events).sort()).toEqual([`unstar:${REPO}:bob:${HOUR}`, `unstar:${REPO}:carol:${HOUR}`]);
+      expect(Object.keys(events).toSorted()).toEqual([`unstar:${REPO}:bob:${HOUR}`, `unstar:${REPO}:carol:${HOUR}`]);
     });
 
     it("records nothing when the count drops but every remembered login is still in the window", () => {
@@ -242,7 +242,7 @@ describe("prune", () => {
       eventAt("stale", NOW - (EVENT_TTL_DAYS + 1) * DAY_MS),
     );
     prune(events);
-    expect(Object.keys(events).sort()).toEqual(["almost", "fresh"]);
+    expect(Object.keys(events).toSorted()).toEqual(["almost", "fresh"]);
   });
 
   it("keeps an event exactly at the cutoff and drops one a millisecond before it", () => {

@@ -34,7 +34,7 @@ class MockOnChanged {
   dispatch(changes: Record<string, StorageChange>, area: string) {
     // Asynchronous, like Chrome: never inside the call that caused it. Microtask, so fake timers do not hold it back.
     void Promise.resolve().then(() => {
-      for (const fn of [...this.listeners]) {
+      for (const fn of Array.from(this.listeners)) {
         try {
           fn(changes, area);
         } catch (e) {

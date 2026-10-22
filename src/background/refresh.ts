@@ -123,6 +123,7 @@ async function runRefresh(mode: "quick" | "full", only?: string[]) {
           let isOrg = (meta[owner.login]?.type ?? owner.type) === "org";
           let after: string | null = null;
           let first = true;
+          // oxlint-disable-next-line no-unmodified-loop-condition -- `stop` is set by fail() from concurrent owner sweeps
           while (!stop) {
             const n = mode === "quick" ? QUICK_REPOS : 100;
             let res: GqlResult<ListData> = await gql<ListData>(token, LIST_QUERY, { owner: owner.login, isOrg, after, n, privacy });

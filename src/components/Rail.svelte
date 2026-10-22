@@ -19,12 +19,12 @@
   const repoCounts = $derived.by(() => {
     const m: Record<string, number> = {};
     for (const e of base) if (app.kindSet.has(e.kind) && app.ownersOn.has(ownerOf(e))) m[e.repo] = (m[e.repo] ?? 0) + 1;
-    const picked = app.view.repos.map((r): [string, number] => [r, m[r] ?? 0]).sort((a, b) => b[1] - a[1]);
+    const picked = app.view.repos.map((r): [string, number] => [r, m[r] ?? 0]).toSorted((a, b) => b[1] - a[1]);
     return [
       ...picked,
       ...Object.entries(m)
         .filter(([r]) => !app.repoSet.has(r))
-        .sort((a, b) => b[1] - a[1]),
+        .toSorted((a, b) => b[1] - a[1]),
     ];
   });
   const rq = $derived(app.rq.trim().toLowerCase());

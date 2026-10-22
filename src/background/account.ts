@@ -28,7 +28,7 @@ export async function validateToken(token?: string) {
     const owners = await getOwners();
     owners[viewer] = { login: viewer, type: "user", avatar: res.data.viewer.avatarUrl, privateAccess: true };
     for (const o of res.data.viewer.organizations.nodes)
-      owners[o.login] = { ...(owners[o.login] ?? {}), login: o.login, type: "org", avatar: o.avatarUrl, privateAccess: o.viewerIsAMember };
+      owners[o.login] = { ...owners[o.login], login: o.login, type: "org", avatar: o.avatarUrl, privateAccess: o.viewerIsAMember };
     await setLocal({ [KEYS.people]: people, [KEYS.owners]: owners });
     // Probe the one permission fine-grained tokens commonly miss. Without it GitHub nulls the whole repository.
     const probe = await gql<unknown>(t, STARS_PROBE_QUERY);

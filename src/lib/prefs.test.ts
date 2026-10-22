@@ -378,7 +378,7 @@ describe("viewIsFiltered", () => {
   });
 
   it("ignores the order of kinds", () => {
-    expect(p.viewIsFiltered(view({ kinds: [...p.RAIL_KIND_IDS].reverse() }))).toBe(false);
+    expect(p.viewIsFiltered(view({ kinds: [...p.RAIL_KIND_IDS].toReversed() }))).toBe(false);
   });
 
   it("is true for hideMe, hideBots or selected repos", () => {
@@ -452,7 +452,7 @@ describe("migration schema 1 -> 2", () => {
     expect(prefs.settings).toEqual(expectedSettings);
     expect(mock.sync.dump()).toEqual({ view: expectedView, layout: expectedLayout, settings: expectedSettings, schema: 2 });
     expect(mock.sync.setCalls).toHaveLength(1);
-    expect(Object.keys(mock.sync.setCalls[0]).sort()).toEqual(["layout", "schema", "settings", "view"]);
+    expect(Object.keys(mock.sync.setCalls[0]).toSorted()).toEqual(["layout", "schema", "settings", "view"]);
   });
 
   it("removes local ui, writes device with lastOpenedAt, and leaves other local data alone", async () => {
@@ -650,7 +650,7 @@ describe("savePref: debounce, coalescing, skipping equal values", () => {
     p.savePref("settings", { ...p.DEFAULT_SETTINGS, theme: "dark" });
     await vi.advanceTimersByTimeAsync(p.DEBOUNCE_MS);
     expect(mock.sync.setCalls).toHaveLength(3);
-    expect(mock.sync.setCalls.map((c) => Object.keys(c)[0]).sort()).toEqual(["layout", "settings", "view"]);
+    expect(mock.sync.setCalls.map((c) => Object.keys(c)[0]).toSorted()).toEqual(["layout", "settings", "view"]);
   });
 
   it("sanitises what it writes", async () => {
@@ -863,7 +863,7 @@ describe("onPrefsChange: echo filtering", () => {
     await chrome.storage.sync.set({ settings: { ...p.DEFAULT_SETTINGS, username: "me", owners } });
     await chrome.storage.sync.set({ layout: layout({ trendClosed: ["star"] }) });
     await mock.settle();
-    expect(cb.mock.calls.map((c) => c[0]).sort()).toEqual(["layout", "settings"]);
+    expect(cb.mock.calls.map((c) => c[0]).toSorted()).toEqual(["layout", "settings"]);
     expect(cb).toHaveBeenCalledWith("settings", { ...p.DEFAULT_SETTINGS, username: "me", owners });
   });
 
