@@ -28,7 +28,7 @@ It covers your own repositories plus any users or organizations you add (for exa
 - **Stacking** folds repeated actions by the same person into one row.
 - **Trends** shows charts of stars, forks, issues and pull requests next to the feed.
 - **Unstars and deleted forks** (optional): GitHub doesn't report these, so the extension tracks them itself.
-- **Chrome WebUI look** in light and dark, at default or compact density.
+- **Chrome WebUI look** in light and dark, at default or compact density, with a choice of accent colours (Chrome's tab group colours or any hex).
 - **Keyboard friendly**: visible focus rings everywhere, and arrow-key navigation in the filter rail.
 - **Runs entirely in your browser**: no server, no runtime dependencies, and it only talks to `api.github.com`.
 
@@ -71,6 +71,7 @@ GitHub's GraphQL API has no anonymous mode, so you need a personal access token.
 - **Stacking** (Settings → Stacking): folds repeated actions by the same person. _Repository_ scope folds within one repository. _Organization_ also folds across repositories of one owner. _Activity type_ folds everything of one type inside a group. Each scope has its own time window. Click a stack to expand it.
 - **Trends**: charts that use the same period, grouping and filters as the feed. Drag a chart to reorder it, or click its name to collapse it. Turn the column on or off in Settings → Feed.
 - **Date and time**: date format, 12- or 24-hour time, first day of the week.
+- **Appearance**: theme (System, Light or Dark), density, and accent colour. The accent drives checkboxes, links, focus rings and selected items. Pick a preset or enter any hex code; the extension derives a light-theme and a dark-theme shade in OKLCH that keep the hue and stay readable (at least 4.5:1 contrast on every surface).
 
 ## How it works
 
@@ -133,7 +134,8 @@ src/
   lib/format.ts          date/time formatting, group labels, week numbers
   lib/prefs.ts           synced settings, filters and layout (see docs/specs/persistence-and-sync.md)
   lib/storage.ts         chrome.storage layout and device-local data
-  lib/app.svelte.ts      reactive app state (Svelte 5 runes)
+  lib/app.svelte.ts      reactive app state (Svelte 5 runes), theme and accent applied to <html>
+  lib/accent.ts          accent presets and OKLCH/contrast derivation of per-theme accent colours
   lib/radiogroup.ts      keyboard behaviour for segmented controls and swatches
   lib/railnav.ts         arrow-key navigation in the filter rail
   components/            Rail, Toolbar, Feed, Row, StackRow, Trends, Settings, …
@@ -141,6 +143,7 @@ src/
 tests/
   helpers/               chrome.storage mock, fixture factories, unit-test setup
   e2e/                   end-to-end suite, global setup, browser helpers
+public/boot.js           applies the cached theme and accent before first paint
 scripts/render-icons.ts  icon renderer
 assets/icon/             icon source (SVG) and store-size PNG
 docs/specs/              design specs

@@ -10,6 +10,7 @@ import {
   type Settings,
   type Status,
 } from "./types";
+import { ACCENT_VAR_NAMES, accentVars } from "./accent";
 import { KEYS, getEvents, getOwners, getPeople, getStatus, getToken, onStorage, setToken } from "./storage";
 import {
   DEFAULT_LAYOUT,
@@ -33,6 +34,10 @@ const freshLayout = (): LayoutPrefs => ({
   trendOrder: [...DEFAULT_LAYOUT.trendOrder],
   trendClosed: [...DEFAULT_LAYOUT.trendClosed],
 });
+/** localStorage key read by public/boot.js before first paint. A cache of the synced settings, never the source of truth. */
+const APPEARANCE_CACHE = "appearance";
+const darkQuery = typeof matchMedia === "function" ? matchMedia("(prefers-color-scheme: dark)") : null;
+
 const flip = <T>(list: T[], v: T): T[] => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
 /**
@@ -51,6 +56,8 @@ class AppState {
   people = $state<Person[]>([]);
   status = $state<Status>({});
   now = $state(new Date());
+  /** The OS colour scheme, for showing swatches as they will look under "System". */
+  systemDark = $state(darkQuery?.matches ?? false);
 
   // tab-only state
   page = $state<"feed" | "settings">("feed");
@@ -95,6 +102,7 @@ class AppState {
     this.status = status;
     this.setEvents(events);
     this.applyTheme();
+    darkQuery?.addEventListener("change", (e) => (this.systemDark = e.matches));
     this.ready = true;
     installFlushOnHide();
     onPrefsChange((key, value) => {
@@ -121,12 +129,29 @@ class AppState {
     this.events = Object.values(map).toSorted((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
   }
 
+  /** True when the page currently renders dark (explicit theme, or "system" on a dark OS). */
+  get dark() {
+    return this.settings.theme === "dark" || (this.settings.theme === "system" && this.systemDark);
+  }
+
+  /** Theme, density and accent onto <html>, mirrored to localStorage so public/boot.js can apply them before first paint. */
   applyTheme() {
     const root = document.documentElement;
-    if (this.settings.theme === "system") root.removeAttribute("data-theme");
-    else root.setAttribute("data-theme", this.settings.theme);
-    if (this.settings.density === "compact") root.setAttribute("data-density", "compact");
+    const { theme, density, accent } = this.settings;
+    const dataTheme = theme === "system" ? null : theme;
+    const dataDensity = density === "compact" ? "compact" : null;
+    const vars = accentVars(accent);
+    if (dataTheme) root.setAttribute("data-theme", dataTheme);
+    else root.removeAttribute("data-theme");
+    if (dataDensity) root.setAttribute("data-density", dataDensity);
     else root.removeAttribute("data-density");
+    for (const name of ACCENT_VAR_NAMES) root.style.removeProperty(name);
+    for (const [name, value] of Object.entries(vars)) root.style.setProperty(name, value);
+    try {
+      localStorage.setItem(APPEARANCE_CACHE, JSON.stringify({ theme: dataTheme, density: dataDensity, vars }));
+    } catch {
+      // Storage full or disabled: the page still themes itself once settings load, only a moment later.
+    }
   }
 
   // ---------- synced writers: replace the object, then hand it to prefs.ts ----------

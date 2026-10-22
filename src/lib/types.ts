@@ -50,6 +50,8 @@ export interface Settings {
   timeFormat: "24" | "12";
   weekStart: 0 | 1;
   theme: "system" | "light" | "dark";
+  /** "" for Chrome blue, otherwise a lowercase "#rrggbb" seed (see src/lib/accent.ts) */
+  accent: string;
   density: "default" | "compact";
 }
 
@@ -117,6 +119,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timeFormat: "24",
   weekStart: 1,
   theme: "system",
+  accent: "",
   density: "default",
 };
 

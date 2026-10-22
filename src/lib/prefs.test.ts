@@ -186,9 +186,18 @@ describe("sanitize", () => {
         timeFormat: "12",
         weekStart: 0,
         theme: "dark",
+        accent: "#a142f4",
         density: "compact",
       };
       expect(p.sanitize("settings", custom)).toEqual(custom);
+    });
+
+    it("keeps an accent only as a canonical #rrggbb hex, and the default for anything else", () => {
+      const accent = (v: unknown) => p.sanitize("settings", { accent: v }).accent;
+      expect(accent("#A142F4")).toBe("#a142f4");
+      expect(accent("0b8043")).toBe("#0b8043");
+      expect(accent("#fa3")).toBe("#ffaa33");
+      for (const bad of ["red", "#12345", "#1234567", "#a142f480", "rgb(1, 2, 3)", "#gggggg", 0x1a73e8, null]) expect(accent(bad)).toBe("");
     });
 
     it("replaces wrong types and enum values with defaults, field by field", () => {
@@ -438,7 +447,9 @@ describe("migration schema 1 -> 2", () => {
     trendOrder: ["pr", "star", "fork", "issue"],
     trendClosed: ["fork"],
   };
-  const { defaultPeriod: _a, defaultGroup: _b, showOwn: _c, showBots: _d, ...expectedSettings } = oldSettings;
+  const { defaultPeriod: _a, defaultGroup: _b, showOwn: _c, showBots: _d, ...kept } = oldSettings;
+  /** Schema 1 had no accent; migrated settings get the default. */
+  const expectedSettings = { ...kept, accent: "" };
 
   beforeEach(() => {
     mock.local.seed({ ui, token: "ghp_secret", events: { x: 1 } });

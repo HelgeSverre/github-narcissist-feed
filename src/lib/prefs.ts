@@ -8,6 +8,7 @@
  *
  * CONTRACT: the exported names, types and signatures below are fixed. Implementations may change.
  */
+import { normalizeHex } from "./accent";
 import { DEFAULT_SETTINGS, type Group, type Kind, type OwnerConfig, type Period, type Settings, type StackScope } from "./types";
 
 export const SCHEMA_VERSION = 2;
@@ -130,6 +131,7 @@ function sanitizeSettings(raw: unknown): Settings {
     timeFormat: oneOf(r.timeFormat, TIME_FORMATS, d.timeFormat),
     weekStart: oneOf(r.weekStart, WEEK_STARTS, d.weekStart),
     theme: oneOf(r.theme, THEMES, d.theme),
+    accent: typeof r.accent === "string" ? (normalizeHex(r.accent) ?? d.accent) : d.accent,
     density: oneOf(r.density, DENSITIES, d.density),
   };
 }

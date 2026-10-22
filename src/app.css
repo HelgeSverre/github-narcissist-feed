@@ -1,5 +1,6 @@
 /* Chrome WebUI-flavoured tokens. Layout: 256px filter rail filter rail (chrome://settings nav) with a faint right divider; full-width toolbar (period + grouping + search left, status + actions far right); content column of day/week/month-grouped cards like chrome://history, with an optional sticky Trends column of charts on the right (>=1100px) that follows the same period and grouping. */
 :root {
+  color-scheme: light;
   --bg: #f1f3f4;
   --card: #ffffff;
   --text: #202124;
@@ -8,9 +9,11 @@
   --sep: rgba(0, 0, 0, 0.06);
   --hover: rgba(0, 0, 0, 0.05);
   --skel: rgba(0, 0, 0, 0.08);
-  --accent: #1a73e8;
-  --accent-bg: rgba(26, 115, 232, 0.1);
-  --focus: #1a73e8;
+  /* Accent: --accent-l/-d and friends are set on <html> by src/lib/accent.ts for a custom accent; Chrome blue otherwise. */
+  --accent: var(--accent-l, #1a73e8);
+  --accent-bg: var(--accent-bg-l, rgba(26, 115, 232, 0.1));
+  --on-accent: var(--on-accent-l, #ffffff);
+  --focus: var(--accent);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
   --c-star: #b06000;
   --c-fork: #5f6368;
@@ -34,9 +37,10 @@
     --sep: rgba(255, 255, 255, 0.08);
     --hover: rgba(255, 255, 255, 0.08);
     --skel: rgba(255, 255, 255, 0.1);
-    --accent: #8ab4f8;
-    --accent-bg: rgba(138, 180, 248, 0.16);
-    --focus: #8ab4f8;
+    --accent: var(--accent-d, #8ab4f8);
+    --accent-bg: var(--accent-bg-d, rgba(138, 180, 248, 0.16));
+    --on-accent: var(--on-accent-d, #292a2d);
+    --focus: var(--accent);
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
     --c-star: #fdd663;
     --c-fork: #9aa0a6;
@@ -57,9 +61,10 @@
   --sep: rgba(255, 255, 255, 0.08);
   --hover: rgba(255, 255, 255, 0.08);
   --skel: rgba(255, 255, 255, 0.1);
-  --accent: #8ab4f8;
-  --accent-bg: rgba(138, 180, 248, 0.16);
-  --focus: #8ab4f8;
+  --accent: var(--accent-d, #8ab4f8);
+  --accent-bg: var(--accent-bg-d, rgba(138, 180, 248, 0.16));
+  --on-accent: var(--on-accent-d, #292a2d);
+  --focus: var(--accent);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
   --c-star: #fdd663;
   --c-fork: #9aa0a6;
@@ -104,6 +109,9 @@ button {
   border: 0;
   padding: 0;
   cursor: pointer;
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 :focus-visible {
   outline: 2px solid var(--focus);
@@ -224,7 +232,7 @@ input[type="checkbox"]:checked::after {
   top: 0;
   width: 4px;
   height: 8px;
-  border: solid var(--card);
+  border: solid var(--on-accent);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -902,7 +910,8 @@ button.day:hover {
   font-weight: 400;
   min-width: 160px;
 }
-.srow input:focus {
+.srow input[type="text"]:focus,
+.srow input[type="password"]:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
@@ -1518,4 +1527,67 @@ input.toggle:focus-visible {
 }
 .tbi[aria-disabled="true"] {
   cursor: progress;
+}
+
+/* ---------- appearance: accent swatches and custom hex ---------- */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 300px;
+}
+.sw {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--sw);
+  color: var(--sw-on);
+}
+.sw .ic {
+  visibility: hidden;
+}
+.sw[aria-checked="true"] {
+  box-shadow:
+    0 0 0 2px var(--card),
+    0 0 0 4px var(--sw);
+}
+.sw[aria-checked="true"] .ic {
+  visibility: visible;
+}
+.sw:focus-visible {
+  outline-offset: 5px;
+}
+.hexfield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hexfield input[type="color"] {
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+  cursor: pointer;
+}
+.hexfield input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.hexfield input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 2px;
+}
+.srow .hexfield input[type="text"] {
+  min-width: 0;
+  width: 96px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.srow .hexfield.bad input[type="text"],
+.srow .hexfield.bad input[type="text"]:focus {
+  border-color: var(--c-closed);
+  box-shadow: 0 0 0 1px var(--c-closed);
 }

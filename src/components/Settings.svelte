@@ -3,6 +3,8 @@
   import { WINDOWS } from "../lib/feed";
   import { daysUntil, relative } from "../lib/format";
   import type { Settings, Status } from "../lib/types";
+  import { ACCENT_PRESETS, DEFAULT_ACCENT, accentTokens, normalizeHex } from "../lib/accent";
+  import { radiogroup } from "../lib/radiogroup";
   import Icon from "./Icon.svelte";
 
   let tokenDraft = $state(app.token);
@@ -25,6 +27,27 @@
     void app.save({ [key]: value } as Partial<Settings>);
   }
   const sel = (e: Event) => (e.target as HTMLSelectElement).value;
+
+  const THEMES: [Settings["theme"], string][] = [
+    ["system", "System"],
+    ["light", "Light"],
+    ["dark", "Dark"],
+  ];
+  const presets = ACCENT_PRESETS.map((p) => ({ ...p, tokens: accentTokens(p.hex) }));
+  const isPreset = $derived(ACCENT_PRESETS.some((p) => p.hex === s.accent));
+  const customTokens = $derived(accentTokens(s.accent));
+  const swatch = (t: ReturnType<typeof accentTokens>) => (app.dark ? t.dark : t.light).accent;
+  const swatchOn = (t: ReturnType<typeof accentTokens>) => (app.dark ? t.dark : t.light).onAccent;
+  /** The hex field's text while the user is typing; null shows the saved accent. Only valid hex is ever saved. */
+  let hexDraft = $state<string | null>(null);
+  const hexShown = $derived(hexDraft ?? (s.accent || DEFAULT_ACCENT.seed));
+  const hexValid = $derived(hexDraft === null || normalizeHex(hexDraft) !== null);
+  function setAccent(value: string) {
+    const hex = value === "" ? "" : normalizeHex(value);
+    if (hex === null) return;
+    // Picking Chrome blue itself means the default, so the exact built-in pair applies.
+    set("accent", hex === DEFAULT_ACCENT.seed ? "" : hex);
+  }
   const chk = (e: Event) => (e.target as HTMLInputElement).checked;
 
   async function saveToken() {
@@ -322,10 +345,83 @@
   <h2 id="s-appearance">Appearance</h2>
   <div class="card">
     <div class="srow">
-      <div class="l">Theme</div>
-      <select class="sel" value={s.theme} onchange={(e) => set("theme", sel(e) as Settings["theme"])} aria-label="Theme"
-        ><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select
-      >
+      <div class="l" id="theme-l">Theme</div>
+      <div class="gseg" role="radiogroup" aria-labelledby="theme-l" use:radiogroup>
+        {#each THEMES as [v, l] (v)}
+          <button type="button" role="radio" aria-checked={s.theme === v} class:on={s.theme === v} onclick={() => set("theme", v)}
+            >{l}</button
+          >
+        {/each}
+      </div>
+    </div>
+    <div class="srow">
+      <div class="l" id="accent-l">
+        Accent colour
+        <div class="sub">Checkboxes, links, focus rings and selected items. Adjusted per theme so text stays readable.</div>
+      </div>
+      <div class="swatches" role="radiogroup" aria-labelledby="accent-l" use:radiogroup>
+        {#each presets as p (p.name)}
+          <button
+            type="button"
+            role="radio"
+            class="sw"
+            aria-checked={s.accent === p.hex}
+            aria-label={p.name}
+            title={p.name}
+            style:--sw={swatch(p.tokens)}
+            style:--sw-on={swatchOn(p.tokens)}
+            onclick={() => setAccent(p.hex)}><Icon name="check" size={12} /></button
+          >
+        {/each}
+        {#if !isPreset}
+          <button
+            type="button"
+            role="radio"
+            class="sw"
+            aria-checked="true"
+            aria-label="Custom {s.accent}"
+            title="Custom {s.accent}"
+            style:--sw={swatch(customTokens)}
+            style:--sw-on={swatchOn(customTokens)}><Icon name="check" size={12} /></button
+          >
+        {/if}
+      </div>
+    </div>
+    <div class="srow">
+      <div class="l">
+        Custom accent
+        <div class="sub">Any colour as a hex code, for example <code>#0b8043</code>.</div>
+      </div>
+      <div class="hexfield" class:bad={!hexValid}>
+        <input
+          type="color"
+          value={normalizeHex(hexShown) ?? DEFAULT_ACCENT.seed}
+          oninput={(e) => {
+            hexDraft = null;
+            setAccent((e.target as HTMLInputElement).value);
+          }}
+          aria-label="Pick a custom accent colour"
+        />
+        <input
+          type="text"
+          value={hexShown}
+          maxlength="7"
+          spellcheck="false"
+          autocomplete="off"
+          aria-label="Custom accent hex code"
+          aria-invalid={!hexValid}
+          oninput={(e) => {
+            hexDraft = (e.target as HTMLInputElement).value;
+            // Full codes apply while typing; shorthand like #fa3 waits for blur so #0b8 isn't applied on the way to #0b8043.
+            if (/^#?[0-9a-f]{6}$/i.test(hexDraft.trim())) setAccent(hexDraft);
+          }}
+          onblur={() => {
+            if (hexDraft !== null) setAccent(hexDraft);
+            hexDraft = null;
+          }}
+          onkeydown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+        />
+      </div>
     </div>
     <div class="srow">
       <div class="l">Density</div>
