@@ -9,7 +9,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": true
   },
   "include": ["tests/**/*.ts", "scripts/**/*.ts", "vite.config.ts", "vitest.config.ts", "vitest.e2e.config.ts", "manifest.config.ts"]
 }
