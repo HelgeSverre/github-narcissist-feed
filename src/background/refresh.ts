@@ -100,6 +100,7 @@ async function runRefresh(mode: "quick" | "full", only?: string[]) {
   let lastRate: Partial<ReturnType<typeof rate>> = {};
   const errors: string[] = [];
   let stop = false; // set on auth / hard rate-limit errors
+  let authFailed = false;
   const privacy = settings.includePrivate ? null : "PUBLIC";
   const save = async () => {
     // Drop data for owners that were removed from settings.
@@ -111,6 +112,7 @@ async function runRefresh(mode: "quick" | "full", only?: string[]) {
   };
   const fail = (where: string, e: unknown) => {
     errors.push(`${where}: ${(e as Error).message}`);
+    if (e instanceof GitHubError && e.kind === "auth") authFailed = true;
     if (e instanceof GitHubError && (e.kind === "auth" || e.kind === "rate")) stop = true;
   };
 
@@ -252,7 +254,7 @@ async function runRefresh(mode: "quick" | "full", only?: string[]) {
       ...stamp,
       ...lastRate,
       lastError: uniq.length ? uniq.slice(0, 3).join(" · ") + (uniq.length > 3 ? ` · and ${uniq.length - 3} more` : "") : null,
-      tokenOk: !errors.some((x) => /401|rejected/.test(x)),
+      tokenOk: !authFailed,
     });
   } catch (e) {
     return await patchStatus({ lastError: (e as Error).message });
