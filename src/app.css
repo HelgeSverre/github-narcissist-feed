@@ -1116,22 +1116,6 @@ input.toggle:checked::after {
   font-size: 12px;
   white-space: nowrap;
 }
-.search kbd {
-  position: absolute;
-  right: 8px;
-  top: 7px;
-  font: 11px/16px var(--font);
-  color: var(--text-2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 0 5px;
-  background: var(--bg);
-  pointer-events: none;
-}
-.search input:focus + kbd,
-.search input:not(:placeholder-shown) + kbd {
-  display: none;
-}
 .gseg {
   display: inline-flex;
   flex: none;
@@ -1191,9 +1175,6 @@ input.toggle:checked::after {
 .tbB .search.bare .ic {
   left: 14px;
   top: 9px;
-}
-.tbB .search.bare kbd {
-  top: 8px;
 }
 .tbB .bsep {
   width: 1px;

@@ -41,8 +41,8 @@
           oninput={() => (app.shown = 40)}
           autocomplete="off"
           aria-label="Search"
+          aria-keyshortcuts="/"
         />
-        <kbd>/</kbd>
       </div>
       <span class="bsep"></span>
       <div class="gseg flat" role="radiogroup" aria-label="Group by" use:radiogroup>
