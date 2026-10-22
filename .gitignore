@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.zip
+*.crx
+
+# Extension signing key: never commit
+*.pem
+
+# Caches: Chrome for Testing, e2e failure screenshots, coverage
+.cache/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Environment and local overrides
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Agent tooling: local settings and scratch
+.claude/settings.local.json
+.amp/in/

@@ -1,0 +1,61 @@
+{
+  "name": "github-narcissist-feed",
+  "version": "0.1.0",
+  "description": "Your GitHub, about you: stars, forks, issues, pull requests, comments and releases on your repositories, in one Chrome tab.",
+  "private": true,
+  "type": "module",
+  "author": {
+    "name": "Helge Sverre",
+    "email": "helge.sverre@gmail.com",
+    "url": "https://helgesver.re"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/HelgeSverre/github-narcissist-feed",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HelgeSverre/github-narcissist-feed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HelgeSverre/github-narcissist-feed/issues"
+  },
+  "keywords": [
+    "chrome-extension",
+    "github",
+    "github-notifications",
+    "stars",
+    "activity-feed",
+    "dashboard",
+    "svelte",
+    "manifest-v3"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:e2e": "vite build && vitest run --config vitest.e2e.config.ts",
+    "icons": "node scripts/render-icons.ts"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^3.0.0",
+    "@puppeteer/browsers": "3.2.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/chrome": "^0.3.6",
+    "@types/node": "22.20.4",
+    "prettier": "3.9.9",
+    "prettier-plugin-svelte": "4.1.1",
+    "puppeteer-core": "25.12.0",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5",
+    "vitest": "5.0.3"
+  }
+}

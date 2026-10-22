@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Narcissus at the pool: a gold star (Octicon star-fill) admiring its reflection, on a Chrome-blue tile -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4d8ff0"/>
+      <stop offset=".62" stop-color="#1a73e8"/>
+      <stop offset="1" stop-color="#0b57d0"/>
+    </linearGradient>
+    <linearGradient id="star" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe082"/>
+      <stop offset="1" stop-color="#fbbc04"/>
+    </linearGradient>
+    <linearGradient id="reflection" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8f0fe" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#e8f0fe" stop-opacity="0"/>
+    </linearGradient>
+    <path id="s" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#tile)"/>
+  <use href="#s" transform="translate(64 82) scale(4.2 -2.6) translate(-8 -14.4)" fill="url(#reflection)"/>
+  <use href="#s" transform="translate(64 74) scale(4.2) translate(-8 -14.4)" fill="url(#star)"/>
+  <path d="M26 78h76" stroke="#fff" stroke-opacity=".75" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
