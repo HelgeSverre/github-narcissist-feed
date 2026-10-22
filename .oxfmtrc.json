@@ -3,5 +3,5 @@
   "printWidth": 140,
   "sortPackageJson": false,
   "svelte": {},
-  "ignorePatterns": ["dist", ".cache", "node_modules", "public", "assets", "src/lib/icons.ts", ".amp", "justfile", "bun.lock"]
+  "ignorePatterns": ["dist", ".cache", "node_modules", "public", "assets", "src/lib/icons.ts", ".amp", "justfile", "bun.lock", ".letta"]
 }
