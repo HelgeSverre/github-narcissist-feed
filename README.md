@@ -29,6 +29,7 @@ It covers your own repositories plus any users or organizations you add (for exa
 - **Trends** shows charts of stars, forks, issues and pull requests next to the feed.
 - **Unstars and deleted forks** (optional): GitHub doesn't report these, so the extension tracks them itself.
 - **Chrome WebUI look** in light and dark, at default or compact density.
+- **Keyboard friendly**: visible focus rings everywhere, and arrow-key navigation in the filter rail.
 - **Runs entirely in your browser**: no server, no runtime dependencies, and it only talks to `api.github.com`.
 
 ![Narcissist Feed in dark mode: filter rail, day-grouped feed with an expanded stack, and Trends charts](docs/media/screenshot-dark.png)
@@ -64,6 +65,7 @@ GitHub's GraphQL API has no anonymous mode, so you need a personal access token.
 ## Using it
 
 - **Rail**: activity types, owners, hiding your own activity, hiding bots, period and repositories. The `+` next to owners searches your organizations, the people you follow and all of GitHub. Click a section heading to collapse it. Counts are for the selected period.
+- **Rail from the keyboard**: ↑/↓ move between filters, Home/End jump to the first and last, Space toggles. On a section heading, ← collapses and → expands; ← anywhere in a section goes back to its heading.
 - **Toolbar**: search (`/` focuses it), group by day, week or month, collapse all groups, refresh, settings.
 - **Rows**: the username links to the profile and the repository name to the repository. The rest of the row opens the item.
 - **Stacking** (Settings → Stacking): folds repeated actions by the same person. _Repository_ scope folds within one repository. _Organization_ also folds across repositories of one owner. _Activity type_ folds everything of one type inside a group. Each scope has its own time window. Click a stack to expand it.
@@ -132,6 +134,8 @@ src/
   lib/prefs.ts           synced settings, filters and layout (see docs/specs/persistence-and-sync.md)
   lib/storage.ts         chrome.storage layout and device-local data
   lib/app.svelte.ts      reactive app state (Svelte 5 runes)
+  lib/radiogroup.ts      keyboard behaviour for segmented controls and swatches
+  lib/railnav.ts         arrow-key navigation in the filter rail
   components/            Rail, Toolbar, Feed, Row, StackRow, Trends, Settings, …
   app.css                Chrome WebUI-flavoured tokens, light and dark
 tests/

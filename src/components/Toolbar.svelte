@@ -2,6 +2,7 @@
   import { app, send } from "../lib/app.svelte";
   import { GROUPS } from "../lib/feed";
   import { relative } from "../lib/format";
+  import { radiogroup } from "../lib/radiogroup";
   import Icon from "./Icon.svelte";
 
   const groupKeys = $derived(app.groupKeys);
@@ -15,6 +16,16 @@
     if (app.refreshing) return;
     void send({ type: "refresh", mode: "quick" });
   }
+
+  // Switching between feed and settings unmounts the focused button; hand focus to its counterpart so keyboard users stay in the toolbar.
+  let lastPage = app.page;
+  $effect(() => {
+    const page = app.page;
+    if (page === lastPage) return;
+    lastPage = page;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    document.querySelector<HTMLElement>(page === "feed" ? "#toolbar .tbi.gear" : "#toolbar .crumbs .ibtn")?.focus();
+  });
 </script>
 
 {#if app.page === "feed"}
@@ -34,7 +45,7 @@
         <kbd>/</kbd>
       </div>
       <span class="bsep"></span>
-      <div class="gseg flat" role="radiogroup" aria-label="Group by">
+      <div class="gseg flat" role="radiogroup" aria-label="Group by" use:radiogroup>
         {#each GROUPS as [v, l] (v)}
           <button
             type="button"
@@ -56,12 +67,12 @@
         <Icon name={allCollapsed ? "unfold" : "fold"} />
       </button>
     </div>
-    <button type="button" class="tbi txt" onclick={refresh} title="Refresh now" aria-label="Refresh now" disabled={!!app.refreshing}>
+    <button type="button" class="tbi txt" onclick={refresh} title="Refresh now" aria-label="Refresh now" aria-disabled={!!app.refreshing}>
       <Icon name="sync" cls={app.refreshing ? "spin" : ""} /><span>{updated}</span>
     </button>
     <button
       type="button"
-      class="tbi"
+      class="tbi gear"
       onclick={() => {
         app.page = "settings";
         window.scrollTo(0, 0);

@@ -244,6 +244,22 @@ input[type="radio"]:checked::after {
   color: var(--accent);
   font-weight: 500;
 }
+/* Rail keyboard focus: the whole row (or header) carries the ring, drawn inset so the rail edge never clips it. */
+.rail > .rsec .frow:has(:focus-visible) {
+  background: var(--accent-bg);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.rail > .rsec .frow input:focus-visible,
+.rail > h2 .sech:focus-visible {
+  outline: none;
+}
+.rail .more {
+  border-radius: 4px;
+}
+.rail .more:focus-visible {
+  outline-offset: -2px;
+}
 
 /* ---------- popover ---------- */
 .pop {
@@ -257,6 +273,7 @@ input[type="radio"]:checked::after {
   padding: 8px 0;
 }
 .pop .search {
+  width: auto;
   margin: 0 8px 8px;
 }
 .pop h3 {
@@ -1019,6 +1036,18 @@ input.toggle:checked::after {
 .rail > h2:hover {
   color: var(--text);
 }
+.rail > h2:focus-within .secbtn {
+  opacity: 0.7;
+}
+.rail > h2:has(.sech:focus-visible) {
+  color: var(--text);
+  background: var(--accent-bg);
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.rail > h2 .ibtn:focus-visible {
+  outline-offset: 0;
+}
 
 /* ---------- toolbar rows ---------- */
 .toolbar {
@@ -1129,7 +1158,7 @@ input.toggle:checked::after {
   background: var(--card);
   padding: 0 4px 0 0;
 }
-.tbB .bar:focus-within {
+.tbB .bar:has(.search input:focus) {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
 }
@@ -1460,4 +1489,33 @@ button.crumb:hover {
 .err {
   color: var(--c-closed);
   font-size: 12px;
+}
+
+/* ---------- keyboard focus ----------
+   The global :focus-visible ring sits 2px outside the element. These adjust it where that would be clipped
+   (overflow: hidden, scroll containers, full-width rows in cards) or collide with neighbouring chrome. */
+.row:focus-visible,
+.tocl:focus-visible {
+  outline-offset: -2px;
+}
+/* .txt clips its overflow for the ellipsis; 2px of padding (cancelled by the margin) leaves room for the link ring. */
+.row .txt {
+  padding: 2px;
+  margin: -2px;
+}
+.row .txt a:focus-visible {
+  outline-offset: 0;
+  border-radius: 2px;
+}
+.thead .grip:focus-visible,
+.reveal:focus-visible,
+.chip .ibtn:focus-visible {
+  outline-offset: 0;
+}
+/* The toggle's knob overhangs its 14px track, so the ring has to clear the knob. */
+input.toggle:focus-visible {
+  outline-offset: 5px;
+}
+.tbi[aria-disabled="true"] {
+  cursor: progress;
 }

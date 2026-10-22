@@ -2,6 +2,7 @@
   import { app } from "../lib/app.svelte";
   import { PERIODS, RAIL_KINDS, ownerOf, periodStart } from "../lib/feed";
   import { viewIsFiltered, type RailSection } from "../lib/prefs";
+  import { railnav } from "../lib/railnav";
   import Icon from "./Icon.svelte";
   import OwnerPopover from "./OwnerPopover.svelte";
 
@@ -35,17 +36,22 @@
   );
   const closed = $derived(new Set(app.layout.railClosed));
   const toggleSec = (id: RailSection) => app.toggleRailSection(id);
+  const toggleById = (id: string) => toggleSec(id as RailSection);
   const lockTitle = "Token can see private repositories here";
 </script>
 
+<svelte:document use:railnav={toggleById} />
+
 {#snippet head(id: RailSection, label: string, extra?: import("svelte").Snippet)}
   <h2 data-sec={id} class:closed={closed.has(id)}>
-    <button type="button" class="sech" aria-expanded={!closed.has(id)} onclick={() => toggleSec(id)}>{label}</button><span class="sp"
-    ></span>
+    <button type="button" class="sech" aria-expanded={!closed.has(id)} aria-controls="rsec-{id}" onclick={() => toggleSec(id)}
+      >{label}</button
+    ><span class="sp"></span>
     {#if extra}{@render extra()}{/if}
     <button
       type="button"
       class="secbtn"
+      tabindex="-1"
       aria-expanded={!closed.has(id)}
       title="{closed.has(id) ? 'Expand' : 'Collapse'} {label}"
       onclick={(e) => {
@@ -76,7 +82,7 @@
 
 {@render head("activity", "Activity")}
 {#if !closed.has("activity")}
-  <div class="rsec">
+  <div class="rsec" id="rsec-activity">
     {#each kindsShown as [k, l, i] (k)}
       <label class="frow"
         ><input
@@ -95,7 +101,7 @@
 
 {@render head("owners", "Owners", plus)}
 {#if !closed.has("owners")}
-  <div class="rsec">
+  <div class="rsec" id="rsec-owners">
     {#each app.settings.owners as o (o.login)}
       {@const meta = app.owners[o.login]}
       <label class="frow">
@@ -120,7 +126,7 @@
 
 {@render head("people", "People")}
 {#if !closed.has("people")}
-  <div class="rsec">
+  <div class="rsec" id="rsec-people">
     <label class="frow"
       ><input type="checkbox" checked={app.view.hideMe} onchange={(e) => app.setHideMe((e.target as HTMLInputElement).checked)} /><span
         class="lbl">Hide my own activity</span
@@ -136,7 +142,7 @@
 
 {@render head("period", "Period")}
 {#if !closed.has("period")}
-  <div class="rsec">
+  <div class="rsec" id="rsec-period">
     {#each PERIODS as [v, l] (v)}
       <label class="frow"
         ><input type="radio" name="period" value={v} checked={app.view.period === v} onchange={() => app.setPeriod(v)} /><span class="lbl"
@@ -149,7 +155,7 @@
 
 {@render head("repositories", "Repositories")}
 {#if !closed.has("repositories")}
-  <div class="rsec">
+  <div class="rsec" id="rsec-repositories">
     <label class="rsearch"
       ><Icon name="search" /><input
         id="rq"

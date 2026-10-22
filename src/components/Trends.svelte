@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick as flush } from "svelte";
   import { app } from "../lib/app.svelte";
   import { TREND_KINDS, type TrendKind } from "../lib/prefs";
   import { bucketList, filterEvents, floorToUnit, periodName, unitFor } from "../lib/feed";
@@ -103,6 +104,19 @@
     dragK = null;
     overK = null;
   }
+  async function move(e: KeyboardEvent, k: TrendKind) {
+    const i = order.indexOf(k);
+    const j = ({ ArrowUp: i - 1, ArrowDown: i + 1, Home: 0, End: order.length - 1 } as Record<string, number>)[e.key];
+    if (j === undefined) return;
+    e.preventDefault();
+    if (j < 0 || j >= order.length || j === i) return;
+    const o = order.filter((x) => x !== k);
+    o.splice(j, 0, k);
+    app.setTrendOrder(o);
+    // The keyed panel is moved in the DOM, which drops focus; put it back on the same handle.
+    await flush();
+    document.querySelector<HTMLElement>(`.tpanel[data-tk="${k}"] .grip`)?.focus();
+  }
   const total = (k: TrendKind) => series[k].reduce((a, b) => a + b, 0);
 </script>
 
@@ -144,12 +158,18 @@
         }}
       >
         <div class="thead">
-          <span class="grip" title="Drag to reorder" aria-hidden="true"
-            ><svg class="ic" viewBox="0 0 16 16"
+          <button
+            type="button"
+            class="grip"
+            title="Drag, or press the arrow keys, to reorder"
+            aria-label="Move {name}"
+            aria-keyshortcuts="ArrowUp ArrowDown Home End"
+            onkeydown={(e) => move(e, k)}
+            ><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"
               ><path
                 d="M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm4-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"
               /></svg
-            ></span
+            ></button
           >
           <button type="button" class="tname tog" aria-expanded={!c} onclick={() => app.toggleTrendClosed(k)}
             ><Icon name="chevron-down" /><span style="color:var({color})"><Icon name={icon} /></span>{name}</button

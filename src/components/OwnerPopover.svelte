@@ -64,6 +64,9 @@
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
     return () => {
+      // Closing removes the focused search field or checkbox; send keyboard focus back to the button that opened the popover.
+      const a = document.activeElement;
+      if (!a || a === document.body || a.closest("#pop")) anchor.focus();
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
       clearTimeout(timer);
