@@ -93,7 +93,7 @@ The token is stored in `chrome.storage.local` in your browser profile. It is nev
 
 ## Development
 
-Run `just` to list the task recipes (`dev`, `build`, `clean`, `icons`, `test`, `e2e`, `lint`, `format`). They run `bun install` automatically when `bun.lock` has changed, and call the package scripts below.
+Run `just` to list the task recipes (`dev`, `build`, `clean`, `icons`, `test`, `e2e`, `e2e-headed`, `lint`, `format`). They run `bun install` automatically when `bun.lock` has changed, and call the package scripts below. `just e2e-headed` shows the browser and slows each action (`E2E_SLOWMO`, default 50 ms); `HEADED=1` does the same for any e2e run.
 
 Requires [Bun](https://bun.sh) 1.4+ as the package manager, and Node 22+ for Vite, Vitest and svelte-check.
 

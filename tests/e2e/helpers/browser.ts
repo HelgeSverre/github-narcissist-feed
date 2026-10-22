@@ -88,12 +88,21 @@ export class ExtensionSession {
   static async launch(): Promise<ExtensionSession> {
     const dist = inject("extensionDir");
     const userDataDir = await mkdtemp(join(tmpdir(), "github-narcissist-feed-e2e-"));
+    // HEADED=1 shows the browser; E2E_SLOWMO=<ms> slows every action so it can be followed.
+    const headed = process.env.HEADED === "1";
     const browser = await launch({
       executablePath: inject("chromeExecutable"),
-      headless: true,
+      headless: !headed,
+      slowMo: Number(process.env.E2E_SLOWMO) || 0,
       userDataDir,
       defaultViewport: VIEWPORT,
-      args: [`--load-extension=${dist}`, `--disable-extensions-except=${dist}`, "--no-first-run", "--no-default-browser-check"],
+      args: [
+        `--load-extension=${dist}`,
+        `--disable-extensions-except=${dist}`,
+        "--no-first-run",
+        "--no-default-browser-check",
+        ...(headed ? [`--window-size=${VIEWPORT.width},${VIEWPORT.height + 120}`] : []),
+      ],
     });
     const errors: string[] = [];
     try {
