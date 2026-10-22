@@ -119,7 +119,6 @@ describe("a profile with schema-1 data", () => {
       hideBots: null,
       period: null,
       group: "Week",
-      resetVisible: true, // hideMe/hideBots differ from the defaults, although the People section is collapsed
       owners: { HelgeSverre: true, "sema-lisp": false },
     });
     expect(await page.$eval("html", (el) => [el.getAttribute("data-theme"), el.getAttribute("data-density")])).toEqual(["dark", "compact"]);

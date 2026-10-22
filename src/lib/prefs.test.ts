@@ -373,31 +373,6 @@ describe("sanitize", () => {
 });
 
 // ---------------------------------------------------------------------------------------------------------------------
-describe("viewIsFiltered", () => {
-  it("is false for the defaults and for period/group changes", () => {
-    expect(p.viewIsFiltered(p.DEFAULT_VIEW)).toBe(false);
-    expect(p.viewIsFiltered(view({ period: "all", group: "month" }))).toBe(false);
-    expect(p.viewIsFiltered(view({ period: "today" }))).toBe(false);
-  });
-
-  it("is true when kinds are a subset", () => {
-    expect(p.viewIsFiltered(view({ kinds: ["star", "fork"] }))).toBe(true);
-    expect(p.viewIsFiltered(view({ kinds: [] }))).toBe(true);
-    expect(p.viewIsFiltered(view({ kinds: p.RAIL_KIND_IDS.slice(1) }))).toBe(true);
-  });
-
-  it("ignores the order of kinds", () => {
-    expect(p.viewIsFiltered(view({ kinds: [...p.RAIL_KIND_IDS].toReversed() }))).toBe(false);
-  });
-
-  it("is true for hideMe, hideBots or selected repos", () => {
-    expect(p.viewIsFiltered(view({ hideMe: true }))).toBe(true);
-    expect(p.viewIsFiltered(view({ hideBots: true }))).toBe(true);
-    expect(p.viewIsFiltered(view({ repos: ["a/b"] }))).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------------------------------------------------
 describe("migration schema 1 -> 2", () => {
   const ui = {
     period: "7",

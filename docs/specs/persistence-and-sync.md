@@ -91,7 +91,6 @@ Runs in `loadPrefs()` when `sync.schema` is missing or below 2 **and** there is 
 
 ## UI changes
 
-- Rail: a "Reset filters" text button appears at the top of the rail only while `view` differs from defaults (period and group excluded, since they are not filters of content).
 - Rail, Repositories: selected repositories always appear at the top of the list, even with zero events in the period, so a persisted selection can always be seen and cleared.
 - Settings → Sync section: "Settings, filters and layout follow your Chrome profile when Chrome sync is on. The token and cached activity stay on this computer." Buttons: Reset filters, Reset layout.
 - Settings → Feed: remove Default period, Default grouping, Show my own activity, Show bot activity.

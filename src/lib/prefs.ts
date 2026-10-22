@@ -186,13 +186,6 @@ export function sanitize<K extends PrefKey>(key: K, raw: unknown): Prefs[K] {
   }
 }
 
-/** True when `view` filters content differently from DEFAULT_VIEW (period and group are ignored). */
-export function viewIsFiltered(view: ViewPrefs): boolean {
-  const kinds = new Set(view.kinds);
-  const allKinds = kinds.size === RAIL_KIND_IDS.length && RAIL_KIND_IDS.every((k) => kinds.has(k));
-  return !allKinds || view.hideMe || view.hideBots || view.repos.length > 0;
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 // Storage plumbing
 // ---------------------------------------------------------------------------------------------------------------------

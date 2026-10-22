@@ -1,7 +1,7 @@
 /**
  * docs/specs/persistence-and-sync.md, "Verification": change filters and layout, reload and assert they persisted;
  * write `view` to chrome.storage.sync from the service worker to play "another computer" and assert the open page
- * follows without a reload; a second tab sees the same state; Reset filters; the Settings > Sync section.
+ * follows without a reload; a second tab sees the same state; Reset filters in Settings > Sync.
  *
  * The groups below run in order against one profile and one open tab. Needs GITHUB_TOKEN or an authenticated `gh` CLI,
  * because the rail needs real repositories and events to filter.
@@ -52,7 +52,7 @@ describe.skipIf(!token)("persistence and sync (needs GITHUB_TOKEN or an authenti
     await ext.afterTest(task);
   });
 
-  it("starts from the defaults, so there is no Reset filters button", async () => {
+  it("starts from the defaults", async () => {
     await expectRail(page, {
       kinds: { Stars: true, Forks: true, Issues: true },
       hideMe: false,
@@ -61,7 +61,6 @@ describe.skipIf(!token)("persistence and sync (needs GITHUB_TOKEN or an authenti
       group: "Day",
       reposChecked: [],
       closedSections: [],
-      resetVisible: false,
     });
     expect((await ext.syncStorage()).view, "nothing has been changed, so nothing is written").toBeUndefined();
   });
@@ -83,10 +82,6 @@ describe.skipIf(!token)("persistence and sync (needs GITHUB_TOKEN or an authenti
         },
         { timeout: 10_000, interval: 100 },
       );
-    });
-
-    it("shows Reset filters once the view differs from the defaults", async () => {
-      await expectRail(page, { resetVisible: true, reposChecked: [repo] });
     });
 
     it("writes the view to chrome.storage.sync", async () => {
@@ -129,8 +124,7 @@ describe.skipIf(!token)("persistence and sync (needs GITHUB_TOKEN or an authenti
       it("restores the period and the grouping", () =>
         expectRail(page, { period: "7", group: "Week" }, "period and grouping after reload"));
       it("restores collapsed rail sections", () => expectRail(page, { closedSections: ["owners"], owners: null }, "layout after reload"));
-      it("restores the repository selection", () =>
-        expectRail(page, { reposChecked: [repo], resetVisible: true }, "repository selection after reload"));
+      it("restores the repository selection", () => expectRail(page, { reposChecked: [repo] }, "repository selection after reload"));
     });
   });
 
@@ -157,14 +151,14 @@ describe.skipIf(!token)("persistence and sync (needs GITHUB_TOKEN or an authenti
     });
   });
 
-  describe("Reset filters", () => {
+  describe("Reset filters (Settings → Sync)", () => {
     beforeAll(async () => {
       await clickResetFilters(page);
       await vi.waitFor(async () => expect((await ext.syncStorage()).view?.repos).toEqual([]), { timeout: 10_000, interval: 100 });
     });
 
-    it("clears the repository selection and the button", async () => {
-      await expectRail(page, { reposChecked: [], resetVisible: false });
+    it("clears the repository selection", async () => {
+      await expectRail(page, { reposChecked: [] });
     });
 
     it("keeps the period, which is not a content filter", async () => {

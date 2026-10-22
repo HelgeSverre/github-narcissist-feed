@@ -1,7 +1,7 @@
 <script lang="ts">
   import { app } from "../lib/app.svelte";
   import { PERIODS, RAIL_KINDS, ownerOf, periodStart } from "../lib/feed";
-  import { viewIsFiltered, type RailSection } from "../lib/prefs";
+  import type { RailSection } from "../lib/prefs";
   import { railnav } from "../lib/railnav";
   import { multiselect } from "../lib/multiselect";
   import Icon from "./Icon.svelte";
@@ -76,10 +76,6 @@
     }}><Icon name="plus" /></button
   >
 {/snippet}
-
-{#if viewIsFiltered(app.view)}
-  <button type="button" class="more" onclick={() => app.resetFilters()}>Reset filters</button>
-{/if}
 
 {@render head("activity", "Activity")}
 {#if !closed.has("activity")}

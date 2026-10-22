@@ -291,7 +291,6 @@ export interface RailState {
   reposChecked: string[];
   /** Collapsed sections, in rail order. */
   closedSections: RailSection[];
-  resetVisible: boolean;
 }
 
 /** Reads the rail state from the DOM. */
@@ -332,7 +331,6 @@ export function readRailState(page: Page): Promise<RailState> {
             .map((l) => l.title)
         : [],
       closedSections: [...document.querySelectorAll("#rail h2[data-sec].closed")].map((h) => h.getAttribute("data-sec")) as RailSection[],
-      resetVisible: [...document.querySelectorAll("#rail button")].some((b) => b.textContent?.trim() === "Reset filters"),
     };
   });
 }
@@ -398,12 +396,9 @@ export async function pickFirstRepository(page: Page): Promise<string> {
   return title;
 }
 
+/** Settings → Sync → Reset filters, then back to the feed. */
 export async function clickResetFilters(page: Page): Promise<void> {
-  await page.bringToFront();
-  const button = await page.evaluateHandle(
-    () => [...document.querySelectorAll<HTMLButtonElement>("#rail button")].find((b) => b.textContent?.trim() === "Reset filters") ?? null,
-  );
-  const el = button.asElement() as ElementHandle<Element> | null;
-  if (!el) throw new Error('The rail has no "Reset filters" button; the view equals the defaults.');
-  await el.click();
+  await goToSettings(page);
+  await page.click("#s-sync + .card button.btn");
+  await goToFeed(page);
 }
