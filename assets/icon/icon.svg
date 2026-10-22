@@ -1,23 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <!-- Narcissus at the pool: a gold star (Octicon star-fill) admiring its reflection, on a Chrome-blue tile -->
+  <!-- Windows XP-style glossy dark tile (dark-mode #292a2d to #202124) with a frosted, inset star (Octicon star-fill-24) and a person (Octicon person-fill-24) cut out of it -->
   <defs>
-    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4d8ff0"/>
-      <stop offset=".62" stop-color="#1a73e8"/>
-      <stop offset="1" stop-color="#0b57d0"/>
-    </linearGradient>
-    <linearGradient id="star" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffe082"/>
-      <stop offset="1" stop-color="#fbbc04"/>
-    </linearGradient>
-    <linearGradient id="reflection" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e8f0fe" stop-opacity=".6"/>
-      <stop offset="1" stop-color="#e8f0fe" stop-opacity="0"/>
-    </linearGradient>
-    <path id="s" d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#292a2d"/><stop offset="1" stop-color="#202124"/></linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity=".04"/></linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+    <mask id="cut"><rect width="24" height="24" fill="#fff"/><path transform="translate(12 13.2) scale(.4) translate(-12 -12)" fill="#000" d="M12 2.5a5.25 5.25 0 0 0-2.519 9.857 9.005 9.005 0 0 0-6.477 8.37.75.75 0 0 0 .727.773H20.27a.75.75 0 0 0 .727-.772 9.005 9.005 0 0 0-6.477-8.37A5.25 5.25 0 0 0 12 2.5Z"/></mask>
+    <filter id="inset" x="-10%" y="-10%" width="120%" height="120%">
+      <feComponentTransfer in="SourceAlpha" result="inv"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer>
+      <feGaussianBlur in="inv" stdDeviation=".5"/><feOffset dy=".55" result="sh"/>
+      <feFlood flood-color="#000" flood-opacity=".45"/><feComposite in2="sh" operator="in"/><feComposite in2="SourceAlpha" operator="in" result="inner"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="inner"/></feMerge>
+    </filter>
+    <clipPath id="tc"><rect x="4" y="4" width="120" height="120" rx="28"/></clipPath>
   </defs>
   <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#tile)"/>
-  <use href="#s" transform="translate(64 82) scale(4.2 -2.6) translate(-8 -14.4)" fill="url(#reflection)"/>
-  <use href="#s" transform="translate(64 74) scale(4.2) translate(-8 -14.4)" fill="url(#star)"/>
-  <path d="M26 78h76" stroke="#fff" stroke-opacity=".75" stroke-width="3.5" stroke-linecap="round"/>
+  <g transform="translate(20.8 20.4) scale(3.6)" filter="url(#inset)">
+    <path fill="#fff" fill-opacity=".85" mask="url(#cut)" d="m12.672.668 3.059 6.197 6.838.993a.75.75 0 0 1 .416 1.28l-4.948 4.823 1.168 6.812a.75.75 0 0 1-1.088.79L12 18.347l-6.116 3.216a.75.75 0 0 1-1.088-.791l1.168-6.811-4.948-4.823a.749.749 0 0 1 .416-1.279l6.838-.994L11.327.668a.75.75 0 0 1 1.345 0Z"/>
+  </g>
+  <path clip-path="url(#tc)" fill="url(#gloss)" d="M4 4h120v52c-30 10-90 10-120 0Z"/>
+  <rect x="4.75" y="4.75" width="118.5" height="118.5" rx="27.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
 </svg>
