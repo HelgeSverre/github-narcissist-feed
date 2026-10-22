@@ -40,8 +40,8 @@ _Dark mode, last 30 days, with your own activity and bots hidden. One person's p
 The extension is not on the Chrome Web Store yet. Build it and load it unpacked:
 
 ```sh
-npm install
-npm run build          # writes dist/
+bun install
+bun run build          # writes dist/
 ```
 
 1. Open `chrome://extensions`.
@@ -49,7 +49,7 @@ npm run build          # writes dist/
 3. Click **Load unpacked** and pick the `dist/` folder.
 4. Click the extension icon in the toolbar (pin it for one-click access). The first time, the page opens on Settings; paste a token (see [Token](#token)). Clicking the icon again focuses the open tab instead of opening another.
 
-After running `npm run build` again, click the reload icon on the extension card. Chrome 137+ ignores `--load-extension`, so loading from the Extensions page is the only option.
+After running `bun run build` again, click the reload icon on the extension card. Chrome 137+ ignores `--load-extension`, so loading from the Extensions page is the only option.
 
 ## Token
 
@@ -93,21 +93,22 @@ The token is stored in `chrome.storage.local` in your browser profile. It is nev
 
 ## Development
 
-Run `just` to list the task recipes (`dev`, `build`, `clean`, `test`, `e2e`, `lint`, `format`, `icons`). They install npm dependencies automatically when `package-lock.json` has changed. The npm scripts below are what they call.
+Run `just` to list the task recipes (`dev`, `build`, `clean`, `icons`, `test`, `e2e`, `lint`, `format`). They run `bun install` automatically when `bun.lock` has changed, and call the package scripts below.
 
-Requires Node 22.18 or newer, because TypeScript scripts run with Node's built-in type stripping.
+Requires [Bun](https://bun.sh) 1.4+ as the package manager, and Node 22+ for Vite, Vitest and svelte-check.
 
 | Command            | What it does                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run dev`      | Vite and CRXJS with hot reload. Load `dist/` once; after that, edits reload the extension.             |
-| `npm run build`    | Production build into `dist/`.                                                                         |
-| `npm run check`    | Type-checks the app (`svelte-check`) and the tests, scripts and configs (`tsc -p tsconfig.node.json`). |
-| `npm run format`   | Formats everything with Prettier. `npm run format:check` only reports.                                 |
-| `npm test`         | Unit tests (Vitest). Fast, offline, no browser.                                                        |
-| `npm run test:e2e` | Builds, then runs the end-to-end suite in Chrome for Testing.                                          |
-| `npm run icons`    | Re-renders the PNG icons and `public/favicon.svg` from `assets/icon/icon.svg`.                         |
+| `bun run dev`      | Vite and CRXJS with hot reload. Load `dist/` once; after that, edits reload the extension.             |
+| `bun run build`    | Production build into `dist/`.                                                                         |
+| `bun run lint`     | oxlint (correctness and suspicious rules, warnings fail).                                              |
+| `bun run check`    | Type-checks the app (`svelte-check`) and the tests, scripts and configs (`tsc -p tsconfig.node.json`). |
+| `bun run format`   | Formats everything with oxfmt. `bun run format:check` only reports.                                    |
+| `bun run test`     | Unit tests (Vitest). Fast, offline, no browser.                                                        |
+| `bun run test:e2e` | Builds, then runs the end-to-end suite in Chrome for Testing.                                          |
+| `bun run icons`    | Re-renders the PNG icons and `public/favicon.svg` from `assets/icon/icon.svg`.                         |
 
-CI runs `check`, `format:check`, `test` and `build` on every push and pull request, and uploads `dist/` as an artifact.
+CI runs `lint`, `check`, `format:check`, `test` and `build` on every push and pull request, and uploads `dist/` as an artifact.
 
 ### Tests
 

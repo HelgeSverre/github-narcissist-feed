@@ -36,26 +36,28 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "oxlint --deny-warnings",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "test": "vitest run",
     "test:e2e": "vite build && vitest run --config vitest.e2e.config.ts",
-    "icons": "node scripts/render-icons.ts"
+    "icons": "bun scripts/render-icons.ts"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^3.0.0",
     "@puppeteer/browsers": "3.2.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
-    "@tsconfig/svelte": "^5.0.4",
+    "@tsconfig/svelte": "^5.0.8",
     "@types/chrome": "^0.3.6",
     "@types/node": "22.20.4",
-    "prettier": "3.9.9",
-    "prettier-plugin-svelte": "4.1.1",
+    "oxfmt": "0.72.0",
+    "oxlint": "1.87.0",
     "puppeteer-core": "25.12.0",
     "svelte": "^5.57.2",
     "svelte-check": "^4.7.7",
     "typescript": "^5.9.3",
     "vite": "^8.3.5",
     "vitest": "5.0.3"
-  }
+  },
+  "packageManager": "bun@1.4.2"
 }

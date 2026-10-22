@@ -2,8 +2,8 @@ import { defineConfig } from "vitest/config";
 
 /**
  * End-to-end suite: the built extension (dist/) in a real Chrome for Testing, driven through puppeteer-core.
- * Run with `npm run test:e2e`, which builds first (`vite build && vitest run --config vitest.e2e.config.ts`).
- * Kept apart from vitest.config.ts so `npm test` stays fast, offline and browser-free.
+ * Run with `bun run test:e2e`, which builds first (`vite build && vitest run --config vitest.e2e.config.ts`).
+ * Kept apart from vitest.config.ts so `bun run test` stays fast, offline and browser-free.
  *
  * Chrome for Testing is installed into .cache/chrome by tests/e2e/global-setup.ts. Token-dependent files use
  * GITHUB_TOKEN or `gh auth token`; the fine-grained scenario needs GITHUB_FINE_GRAINED_TOKEN. Missing tokens skip, never fail.

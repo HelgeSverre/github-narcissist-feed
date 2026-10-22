@@ -16,9 +16,9 @@ const cacheDir = resolve(root, ".cache/chrome");
 const extensionDir = resolve(root, "dist");
 
 export default async function setup(project: TestProject): Promise<void> {
-  // `npm run test:e2e` builds first; this only guards against running vitest directly on a missing or empty dist/.
+  // `bun run test:e2e` builds first; this only guards against running vitest directly on a missing or empty dist/.
   if (!existsSync(resolve(extensionDir, "manifest.json"))) {
-    throw new Error(`No built extension at ${extensionDir}. Run \`npm run test:e2e\` (it builds first) or \`npm run build\`.`);
+    throw new Error(`No built extension at ${extensionDir}. Run \`bun run test:e2e\` (it builds first) or \`bun run build\`.`);
   }
 
   // Screenshots of failing tests (see ExtensionSession.afterTest); drop the ones from earlier runs.
