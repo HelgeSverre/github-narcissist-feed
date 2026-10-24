@@ -1,6 +1,7 @@
 import {
   DEFAULT_SETTINGS,
   type FeedEvent,
+  type DeviceState,
   type Group,
   type Kind,
   type Message,
@@ -11,7 +12,7 @@ import {
   type Status,
 } from "./types";
 import { ACCENT_VAR_NAMES, accentVars } from "./accent";
-import { KEYS, getEvents, getOwners, getPeople, getStatus, getToken, onStorage, setToken } from "./storage";
+import { KEYS, getEvents, getOwners, getPeople, getStatus, getToken, onStorage, setToken, getLocal, setLocal } from "./storage";
 import {
   DEFAULT_LAYOUT,
   DEFAULT_VIEW,
@@ -47,6 +48,7 @@ const flip = <T>(list: T[], v: T): T[] => (list.includes(v) ? list.filter((x) =>
  */
 class AppState {
   ready = $state(false);
+  onboardingComplete = $state(false);
   settings = $state.raw<Settings>({ ...DEFAULT_SETTINGS });
   view = $state.raw<ViewPrefs>(freshView());
   layout = $state.raw<LayoutPrefs>(freshLayout());
@@ -85,14 +87,16 @@ class AppState {
   }
 
   private async load() {
-    const [prefs, token, events, owners, people, status] = await Promise.all([
+    const [prefs, token, events, owners, people, status, device] = await Promise.all([
       loadPrefs(),
       getToken(),
       getEvents(),
       getOwners(),
       getPeople(),
       getStatus(),
+      getLocal<DeviceState>(KEYS.device, {}),
     ]);
+    this.onboardingComplete = device.onboardingComplete === true || Boolean(token && prefs.settings.username);
     this.settings = prefs.settings;
     this.view = prefs.view;
     this.layout = prefs.layout;
@@ -124,6 +128,7 @@ class AppState {
       if (changes[KEYS.owners]) this.owners = (changes[KEYS.owners].newValue ?? {}) as Record<string, OwnerMeta>;
       if (changes[KEYS.people]) this.people = (changes[KEYS.people].newValue ?? []) as Person[];
       if (changes[KEYS.status]) this.status = (changes[KEYS.status].newValue ?? {}) as Status;
+      if ((changes[KEYS.device]?.newValue as DeviceState | undefined)?.onboardingComplete) this.onboardingComplete = true;
       if (changes[KEYS.token]) this.token = (changes[KEYS.token].newValue ?? "") as string;
     });
     setInterval(() => (this.now = new Date()), 15_000);
@@ -173,6 +178,13 @@ class AppState {
   private patchLayout(patch: Partial<LayoutPrefs>) {
     this.layout = { ...this.layout, ...patch };
     savePref("layout", this.layout);
+  }
+
+  async completeOnboarding() {
+    const device = await getLocal<DeviceState>(KEYS.device, {});
+    await setLocal({ [KEYS.device]: { ...device, onboardingComplete: true } });
+    this.onboardingComplete = true;
+    this.page = "feed";
   }
 
   async saveToken(token: string) {

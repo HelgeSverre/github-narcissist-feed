@@ -7,11 +7,14 @@
   import Settings from "./components/Settings.svelte";
   import Trends from "./components/Trends.svelte";
   import Toc from "./components/Toc.svelte";
+  import { isWebsite } from "./lib/platform";
+  import Pwa from "./components/Pwa.svelte";
+  import Onboarding from "./components/Onboarding.svelte";
 
   onMount(async () => {
     await app.boot();
-    if (!app.hasToken) app.page = "settings";
-    else if (!app.events.length) void send({ type: "refresh", mode: "full" });
+    if (app.onboardingComplete && !app.hasToken && !app.settings.username) app.page = "settings";
+    if (app.onboardingComplete && app.settings.refreshMinutes > 0 && !app.events.length) void send({ type: "refresh", mode: "full" });
     document.addEventListener("keydown", (ev) => {
       const tag = (ev.target as HTMLElement).tagName;
       if (ev.key === "/" && tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && app.page === "feed") {
@@ -22,7 +25,9 @@
   });
 </script>
 
-{#if app.ready}
+{#if app.ready && !app.onboardingComplete}
+  <Onboarding />
+{:else if app.ready}
   <aside class="rail" id="rail"><Rail /></aside>
   <main class="main">
     <div class="toolbar" id="toolbar"><Toolbar /></div>
@@ -38,3 +43,5 @@
     </div>
   </main>
 {/if}
+
+{#if isWebsite && app.onboardingComplete}<Pwa />{/if}

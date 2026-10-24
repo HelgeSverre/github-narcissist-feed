@@ -73,6 +73,7 @@ export interface Person {
 }
 
 export interface Status {
+  publicCoverage?: { checked: number; total: number };
   viewer?: string;
   tokenOk?: boolean;
   tokenError?: string;
@@ -101,6 +102,7 @@ export interface RepoLedger {
 
 /** Device-only UI state (chrome.storage.local `device`). Synced UI state lives in prefs.ts. */
 export interface DeviceState {
+  onboardingComplete?: boolean;
   lastOpenedAt?: string;
 }
 

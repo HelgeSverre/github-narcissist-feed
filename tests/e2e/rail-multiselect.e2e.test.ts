@@ -10,7 +10,10 @@ let page: Page;
 beforeAll(async () => {
   ext = await launchExtension();
   await ext.inWorker(async () => {
-    await chrome.storage.sync.set({ settings: { username: "octo", owners: [{ login: "octo", type: "user", on: true }] } });
+    await chrome.storage.local.set({ device: { onboardingComplete: true } });
+    await chrome.storage.sync.set({
+      settings: { username: "octo", refreshMinutes: 0, owners: [{ login: "octo", type: "user", on: true }] },
+    });
   });
   page = await ext.openPage({ ready: "#rsec-activity label.frow" });
 });

@@ -56,9 +56,15 @@
     <button type="button" class="linkbtn" onclick={() => (app.page = "settings")}>Settings</button>
   </p>
 {/if}
-{#if !app.hasToken}
+{#if !app.hasToken && app.settings.username}
+  <p class="note">
+    Public mode · Recent activity from public repositories. Repositories are checked in batches to stay within GitHub’s public limit.{#if app.status.publicCoverage}
+      Last refresh: {app.status.publicCoverage.checked} of {app.status.publicCoverage.total} repositories.{/if}
+  </p>
+{/if}
+{#if !app.hasToken && !app.settings.username}
   <div class="card empty">
-    Add a GitHub personal access token in Settings to load your feed.<br /><button
+    Set up a GitHub username to load public activity, or connect a token in Settings.<br /><button
       type="button"
       class="btn"
       style="margin-top:12px"

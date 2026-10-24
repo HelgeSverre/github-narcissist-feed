@@ -24,7 +24,7 @@ const ARTIFACT_DIR = join(process.cwd(), ".cache", "e2e-failures");
 // ---------------------------------------------------------------------------------------------------------------------
 
 export interface OpenPageOptions {
-  /** Selector that proves the app has booted. Defaults to the rail, which only renders once prefs and data are loaded. */
+  /** Selector that proves the app has booted. Defaults to the rail or first-run wizard, once prefs and data are loaded. */
   ready?: string;
 }
 
@@ -119,7 +119,7 @@ export class ExtensionSession {
    * Opens an extension page in a new tab and brings it to the foreground. Uncaught page errors and `console.error`
    * calls are recorded and fail the running test in {@link afterTest} / {@link assertNoErrors}.
    */
-  async openPage({ ready = "#rail" }: OpenPageOptions = {}): Promise<Page> {
+  async openPage({ ready = "#rail, #setup-username" }: OpenPageOptions = {}): Promise<Page> {
     const page = await this.browser.newPage();
     this.pages.add(page);
     page.on("close", () => this.pages.delete(page));
@@ -219,7 +219,10 @@ export type RefreshStatus = Status;
 
 /** Stores the token the way the Settings field does; the service worker then validates it and starts a full sweep. */
 export function storeToken(page: Page, token: string): Promise<void> {
-  return page.evaluate((t) => chrome.storage.local.set({ token: t }), token);
+  return page.evaluate(async (t) => {
+    const { device = {} } = await chrome.storage.local.get<{ device?: DeviceState }>("device");
+    await chrome.storage.local.set({ device: { ...device, onboardingComplete: true }, token: t });
+  }, token);
 }
 
 /** Waits until the first full sweep has finished (stamped `lastFullAt`, no refresh running) and returns the status. */

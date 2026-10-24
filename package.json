@@ -41,7 +41,12 @@
     "format:check": "oxfmt --check",
     "test": "vitest run",
     "test:e2e": "vite build && vitest run --config vitest.e2e.config.ts",
-    "icons": "bun scripts/render-icons.ts"
+    "icons": "bun scripts/render-icons.ts",
+    "dev:web": "vite --mode web",
+    "build:web": "vite build --mode web",
+    "preview:web": "vite preview --mode web",
+    "test:web": "bun run build:web && bun scripts/test-web.ts",
+    "clean": "rm -rf dist dist-web coverage .vite node_modules/.vite .cache/e2e-failures"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^3.0.0",
@@ -57,7 +62,11 @@
     "svelte-check": "^4.7.7",
     "typescript": "^5.9.3",
     "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "5.0.3"
   },
-  "packageManager": "bun@1.4.2"
+  "packageManager": "bun@1.4.2",
+  "dependencies": {
+    "idb-keyval": "^6.3.0"
+  }
 }

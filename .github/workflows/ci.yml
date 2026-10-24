@@ -36,6 +36,8 @@ jobs:
         run: bun run test
       - name: Build extension
         run: bun run build
+      - name: Build website and PWA
+        run: bun run build:web
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: narcissist-feed-${{ github.sha }}

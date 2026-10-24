@@ -1,6 +1,6 @@
 /**
  * Settings > Appearance: theme toggle and accent colour reach chrome.storage.sync and the page's CSS, and survive a reload.
- * Needs no GitHub token: without one the page opens on Settings.
+ * Needs no GitHub token: setup is marked complete so this suite tests Settings directly.
  */
 import type { Page } from "puppeteer-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -11,6 +11,7 @@ let ext: ExtensionSession;
 let page: Page;
 beforeAll(async () => {
   ext = await launchExtension();
+  await ext.inWorker(() => chrome.storage.local.set({ device: { onboardingComplete: true } }));
   page = await ext.openPage({ ready: "#s-appearance" });
 });
 afterAll(async () => {

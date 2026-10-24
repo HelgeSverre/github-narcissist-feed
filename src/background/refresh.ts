@@ -11,10 +11,11 @@ import {
   normalizeRepo,
   type RepoNode,
 } from "../lib/github";
-import { KEYS, getEvents, getLedger, getOwners, getSettings, getStatus, getToken, patchStatus, setLocal } from "../lib/storage";
+import { KEYS, getLocal, getEvents, getLedger, getOwners, getSettings, getStatus, getToken, patchStatus, setLocal } from "../lib/storage";
 import { rate, validateToken } from "./account";
 import { diffLedger, mergeEvent, prune } from "./ledger";
 import { log } from "./log";
+import { refreshPublic } from "./public-refresh";
 
 const QUICK_REPOS = 40; // most recently pushed repositories per owner in a quick refresh
 const CONCURRENCY = 6; // parallel detail requests; measured: 520 repos in ~16 s, no throttling
@@ -62,6 +63,7 @@ interface ListPage {
 }
 
 async function runRefresh(mode: "quick" | "full", only?: string[]) {
+  if ((await getLocal<number>("setupInProgress", 0)) > Date.now()) return;
   const t0 = Date.now();
   const status = await getStatus();
   if (status.refreshing && status.refreshingSince && Date.now() - Date.parse(status.refreshingSince) < REFRESH_LOCK_MS) {
@@ -69,7 +71,11 @@ async function runRefresh(mode: "quick" | "full", only?: string[]) {
     return status;
   }
   const token = await getToken();
-  if (!token) return patchStatus({ tokenOk: false, tokenError: "No token configured", refreshing: null });
+  if (!token) {
+    const device = await getLocal<{ onboardingComplete?: boolean }>(KEYS.device, {});
+    if (!device.onboardingComplete) return;
+    return refreshPublic(mode);
+  }
   const settings = await getSettings();
   let viewer = status.viewer;
   let stars = status.starsAccess;

@@ -48,10 +48,10 @@ describe.skipIf(!token)("feed with a real token (needs GITHUB_TOKEN or an authen
     await ext.afterTest(task);
   });
 
-  it("opens on Settings while no token is stored", async () => {
+  it("opens the setup wizard on a fresh profile", async () => {
     page = await ext.openPage();
-    await page.waitForSelector(".settings");
-    expect(await page.$eval(".kv li .v", (el) => el.textContent?.trim())).toBe("No token");
+    await page.waitForSelector("#setup-username");
+    expect(await page.$eval("#setup-title", (el) => el.textContent)).toBe("Your GitHub, about you.");
   });
 
   it("validates the token and finishes a full sweep without errors", async () => {

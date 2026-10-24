@@ -48,13 +48,62 @@ bun run build          # writes dist/
 1. Open `chrome://extensions`.
 2. Turn on **Developer mode** (top right).
 3. Click **Load unpacked** and pick the `dist/` folder.
-4. Click the extension icon in the toolbar (pin it for one-click access). The first time, the page opens on Settings; paste a token (see [Token](#token)). Clicking the icon again focuses the open tab instead of opening another.
+4. Click the extension icon in the toolbar (pin it for one-click access). The first time, a short setup guides you through public or token-based access (see [Token](#token)). Clicking the icon again focuses the open tab instead of opening another.
 
 After running `bun run build` again, click the reload icon on the extension card. Chrome 137+ ignores `--load-extension`, so loading from the Extensions page is the only option.
 
+## Website and PWA
+
+The same app can run as a static website with no backend:
+
+```sh
+bun install
+bun run dev:web       # website development server
+bun run build:web     # deploy dist-web/ to a static host
+bun run preview:web   # test the production website locally
+bun run test:web      # build + browser smoke test (run bun run icons once to install test Chrome)
+```
+
+Host **dist-web/** over HTTPS (localhost also works for development). Use build command
+`bun run build:web` and publish directory `dist-web` on your static host. For a subdirectory,
+set `VITE_BASE_PATH=/github-narcissist-feed/` when building. Serve `sw.js` with
+`Cache-Control: no-cache` so browsers can discover updates promptly.
+
+The website includes an installable manifest, app icons, offline app-shell caching,
+an offline indicator and a prompt before activating updates. Install using the in-app
+button where supported or the browser's install menu. On iOS, use Safari's Share → Add
+to Home Screen. Open it online once before using it offline; saved activity remains
+available, while GitHub requests require a connection.
+
+Tokens, settings and cached activity are stored in IndexedDB on this device, separately
+from the extension; there is no Chrome profile sync on the website. Only app assets are
+cached by the service worker, never GitHub API responses. Clearing site data removes
+the token and feed. Automatic refresh runs while the website/PWA is open and resumes
+when you return or reconnect. Browsers do not provide reliable closed-app background
+polling; retain the extension if you need that behavior.
+
+## First-time setup
+
+On your first visit, a centered five-step setup asks for your GitHub username, access mode,
+accent color, feed style and update frequency. Public mode needs no token. Focused feed
+hides your own activity and bots, groups repeated actions and hides charts; Everything
+shows individual actions and trend charts. Choices are saved when you open the dashboard,
+and setup stays dismissed on that device. Existing connected accounts go straight to the feed.
+
+Public mode uses GitHub’s unauthenticated REST API. It loads recent public repository
+events in rotating batches, with at most 20 requests per refresh and a default 30-minute
+interval. Large accounts take multiple refreshes to cover. GitHub limits anonymous access
+to [60 requests per hour per IP](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)
+and its Events API provides a limited recent timeline, so authenticated mode offers fuller
+coverage and history. Public mode does not detect unstars or deleted forks.
+
+Choosing **Only when I ask** disables scheduled refreshes; finishing setup still loads your
+first feed. You can change feed preferences, accent and refresh frequency in Settings.
+
 ## Token
 
-GitHub's GraphQL API has no anonymous mode, so you need a personal access token.
+A personal access token is optional. Choose **Connect with a token** during setup or add
+one in Settings for private repositories and the authenticated GraphQL feed.
 
 1. Create a **fine-grained** token at <https://github.com/settings/personal-access-tokens/new>.
 2. Repository access: **All repositories**, so new repositories are included. Pick _Public repositories_ if you don't want private ones.
@@ -103,6 +152,7 @@ Requires [Bun](https://bun.sh) 1.4+ as the package manager, and Node 22+ for Vit
 | Command            | What it does                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------ |
 | `bun run dev`      | Vite and CRXJS with hot reload. Load `dist/` once; after that, edits reload the extension.             |
+| `bun run clean`    | Removes extension and website builds, coverage, Vite caches and e2e failure screenshots.               |
 | `bun run build`    | Production build into `dist/`.                                                                         |
 | `bun run lint`     | oxlint (correctness and suspicious rules, warnings fail).                                              |
 | `bun run check`    | Type-checks the app (`svelte-check`) and the tests, scripts and configs (`tsc -p tsconfig.node.json`). |

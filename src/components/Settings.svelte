@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { isWebsite } from "../lib/platform";
   import { app, send } from "../lib/app.svelte";
   import { WINDOWS } from "../lib/feed";
   import { daysUntil, relative } from "../lib/format";
@@ -80,7 +81,7 @@
     <div class="srow">
       <div class="l">
         Username
-        <div class="sub">Filled in from the token. Your own repositories are always included.</div>
+        <div class="sub">Your GitHub account. Your own repositories are always included.</div>
       </div>
       <input type="text" id="s-user" value={s.username} readonly aria-label="Username" />
     </div>
@@ -114,7 +115,7 @@
           style="min-width:140px"
           aria-label="Add owner"
         />
-        <button type="button" class="btn" onclick={addOwner} disabled={!app.hasToken}>Add</button>
+        <button type="button" class="btn" onclick={addOwner}>Add</button>
       </div>
     </div>
     <div class="srow block">
@@ -126,8 +127,8 @@
           Read-only everything except stars loads.
         </div>
         <div class="sub">
-          The token stays in this browser profile's extension storage and is only sent to api.github.com. It is not synced, so paste it once
-          on each computer.
+          The token stays in this browser's local storage and is only sent to api.github.com. It is not synced, so paste it once on each
+          computer.
         </div>
         <a class="xlink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener"
           >Create a fine-grained token on GitHub<Icon name="link-external" size={12} /></a
@@ -160,7 +161,7 @@
         <li>
           <span class="k">Status</span><span class="v">
             {#if saving}<Icon name="sync" size={14} /> Checking…
-            {:else if !app.hasToken}<Icon name="x-circle" cls="k-neutral" size={14} /> No token
+            {:else if !app.hasToken}<Icon name="x-circle" cls="k-neutral" size={14} /> Public only — no token needed
             {:else if st.tokenOk}<Icon name="check-circle" cls="k-open" size={14} /> Valid as {st.viewer}{#if exp !== null}, expires in {exp}
                 days{/if}
             {:else}<Icon name="x-circle" cls="k-closed" size={14} /> {st.tokenError ?? "Not validated"}{/if}
@@ -178,7 +179,8 @@
         <li>
           <span class="k">Rate limit</span><span class="v"
             ><Icon name="sync" size={14} />
-            {st.rateRemaining?.toLocaleString() ?? "–"} of {st.rateLimit?.toLocaleString() ?? "5,000"} requests left this hour</span
+            {st.rateRemaining?.toLocaleString() ?? "–"} of {st.rateLimit?.toLocaleString() ?? (app.hasToken ? "5,000" : "60")} requests left this
+            hour</span
           >
         </li>
         <li>
@@ -435,7 +437,9 @@
   <div class="card">
     <div class="srow">
       <div class="l">
-        Settings, filters and layout follow your Chrome profile when Chrome sync is on. The token and cached activity stay on this computer.
+        {#if isWebsite}Settings, filters, tokens and cached activity stay in this browser on this device. Refresh runs while the app is
+          open.{:else}Settings, filters and layout follow your Chrome profile when Chrome sync is on. The token and cached activity stay on
+          this computer.{/if}
       </div>
       <div class="chips">
         <button type="button" class="btn" onclick={() => app.resetFilters()}>Reset filters</button><button

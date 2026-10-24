@@ -3,7 +3,7 @@
  * account.ts (token, owners, people), refresh.ts (the sweep) and ledger.ts (pure event/ledger logic).
  * Listeners must be registered synchronously at the top level, so everything below runs at module load.
  */
-import { KEYS, getSettings, getStatus, patchStatus } from "../lib/storage";
+import { KEYS, getSettings, getToken, getStatus, patchStatus } from "../lib/storage";
 import { sanitize } from "../lib/prefs";
 import type { Message, Settings } from "../lib/types";
 import { loadPeople, resolveOwner, searchOwners, validateToken } from "./account";
@@ -25,7 +25,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 chrome.runtime.onStartup.addListener(async () => {
   await scheduleAlarms();
-  await refresh("quick", "startup");
+  if ((await getSettings()).refreshMinutes > 0) await refresh("quick", "startup");
 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "quick") await refresh("quick", "alarm");
@@ -58,6 +58,7 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   }
   if (area === "local" && changes[KEYS.token] && changes[KEYS.token].newValue) {
     await validateToken();
+    await scheduleAlarms();
     await refresh("full", "token changed");
   }
 });
@@ -88,5 +89,5 @@ async function scheduleAlarms() {
   await chrome.alarms.clear("quick");
   await chrome.alarms.clear("full");
   if (s.refreshMinutes > 0) await chrome.alarms.create("quick", { periodInMinutes: s.refreshMinutes });
-  await chrome.alarms.create("full", { periodInMinutes: 60 });
+  if (s.refreshMinutes > 0 && (await getToken())) await chrome.alarms.create("full", { periodInMinutes: 60 });
 }

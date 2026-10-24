@@ -34,6 +34,7 @@ describe("a profile with schema-1 data", () => {
       await chrome.storage.local.remove(["ui", "device"]);
       await chrome.storage.sync.set({
         settings: {
+          refreshMinutes: 0,
           username: "HelgeSverre",
           owners: [
             { login: "HelgeSverre", type: "user", on: true },
@@ -48,6 +49,7 @@ describe("a profile with schema-1 data", () => {
         },
       });
       await chrome.storage.local.set({
+        device: { onboardingComplete: true },
         ui: {
           period: "7",
           group: "week",
@@ -59,7 +61,7 @@ describe("a profile with schema-1 data", () => {
         },
       });
     });
-    // Opening the page runs the migration (loadPrefs); there is no token, so it opens on Settings.
+    // Opening the page runs the migration (loadPrefs); the preconfigured profile opens on its feed.
     await ext.openPage();
     await vi.waitFor(async () => expect((await ext.syncStorage()).schema, "the page never wrote schema 2").toBe(2), {
       timeout: 10_000,
@@ -111,7 +113,7 @@ describe("a profile with schema-1 data", () => {
 
   it("shows the migrated preferences in the UI", async () => {
     const page = await ext.openPage();
-    // No token, so the app opens on Settings and the toolbar has no Day/Week/Month control until we go to the feed.
+    // The migrated, configured profile opens directly on its feed.
     await goToFeed(page);
     // People and Period are collapsed by the migrated layout, so their inputs are not rendered at all.
     await expectRail(page, {

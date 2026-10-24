@@ -11,9 +11,11 @@ let page: Page;
 beforeAll(async () => {
   ext = await launchExtension();
   await ext.inWorker(async () => {
+    await chrome.storage.local.set({ device: { onboardingComplete: true } });
     await chrome.storage.sync.set({
       settings: {
         username: "octo",
+        refreshMinutes: 0,
         owners: [
           { login: "octo", type: "user", on: true },
           { login: "acme", type: "org", on: true },

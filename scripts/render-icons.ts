@@ -13,7 +13,7 @@ import { launch } from "puppeteer-core";
 
 /** Keep in step with CHROME_BUILD_ID in tests/e2e/global-setup.ts so only one build is cached. */
 const CHROME_BUILD_ID = "156.0.8078.47";
-const SIZES = [16, 32, 48, 128, 256] as const;
+const SIZES = [16, 32, 48, 128, 180, 192, 256, 512] as const;
 
 const root = resolve(import.meta.dirname, "..");
 const platform = detectBrowserPlatform();
@@ -41,6 +41,11 @@ try {
     await page.screenshot({ path: out as `${string}.png`, omitBackground: true, clip: { x: 0, y: 0, width: size, height: size } });
     console.log("wrote", out);
   }
+  await page.setViewport({ width: 512, height: 512, deviceScaleFactor: 1 });
+  await page.setContent(
+    `<!doctype html><style>html,body{margin:0;background:#202124}svg{position:absolute;left:102px;top:102px;width:308px;height:308px}</style>${svg}`,
+  );
+  await page.screenshot({ path: resolve(root, "public/icons/icon-maskable-512.png") as `${string}.png` });
 } finally {
   await browser.close();
 }

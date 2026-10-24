@@ -21,7 +21,7 @@ build: deps
 
 [group('dev')]
 clean:
-    rm -rf dist coverage .cache/e2e-failures
+    bun run clean
 
 # Render icons from assets/icon/icon.svg.
 [group('dev')]
