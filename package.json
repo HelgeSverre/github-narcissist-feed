@@ -46,7 +46,8 @@
     "build:web": "vite build --mode web",
     "preview:web": "vite preview --mode web",
     "test:web": "bun run build:web && bun scripts/test-web.ts",
-    "clean": "rm -rf dist dist-web coverage .vite node_modules/.vite .cache/e2e-failures"
+    "clean": "rm -rf dist dist-web coverage .vite node_modules/.vite .cache/e2e-failures",
+    "prototype:display": "vite --mode web --open /display-prototype.html"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^3.0.0",
