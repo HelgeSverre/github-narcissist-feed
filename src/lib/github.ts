@@ -73,7 +73,7 @@ const REPO = `fragment R on Repository {
   stargazers(last:5, orderBy:{field:STARRED_AT, direction:ASC}) @include(if:$stars) { edges { starredAt node { login avatarUrl } } }
   forks(last:5, orderBy:{field:CREATED_AT, direction:ASC}) { nodes { createdAt nameWithOwner owner { login avatarUrl } } }
   issues(last:5, orderBy:{field:UPDATED_AT, direction:ASC}) { nodes { number title state createdAt updatedAt closedAt url author { ...A } comments(last:2) { totalCount nodes { createdAt url author { ...A } } } } }
-  pullRequests(last:5, orderBy:{field:UPDATED_AT, direction:ASC}) { nodes { number title state isDraft createdAt updatedAt mergedAt closedAt url author { ...A } additions deletions comments(last:2) { totalCount nodes { createdAt url author { ...A } } } reviews(last:2) { nodes { state submittedAt url author { ...A } } } } }
+  pullRequests(last:5, orderBy:{field:UPDATED_AT, direction:ASC}) { nodes { number title state isDraft createdAt updatedAt mergedAt closedAt mergedBy { ...A } url author { ...A } additions deletions timelineItems(last:1, itemTypes:[CLOSED_EVENT]) { nodes { ... on ClosedEvent { createdAt actor { ...A } } } } comments(last:2) { totalCount nodes { createdAt url author { ...A } } } reviews(last:2) { nodes { state submittedAt url author { ...A } } } } }
   releases(last:3, orderBy:{field:CREATED_AT, direction:ASC}) { nodes { name tagName createdAt publishedAt url author { login avatarUrl } } }
 }`;
 
@@ -163,10 +163,12 @@ export interface RepoNode {
       updatedAt: string;
       mergedAt: string | null;
       closedAt: string | null;
+      mergedBy?: Actor | null;
       url: string;
       author: Actor | null;
       additions: number;
       deletions: number;
+      timelineItems?: { nodes: ({ createdAt: string; actor: Actor | null } | null)[] };
       comments: { totalCount: number; nodes: ({ createdAt: string; url: string; author: Actor | null } | null)[] };
       reviews: { nodes: ({ state: string; submittedAt: string | null; url: string; author: Actor | null } | null)[] };
     } | null)[];
@@ -260,16 +262,18 @@ export function normalizeRepo(r: RepoNode, viewer: string): FeedEvent[] {
   for (const p of present(r.pullRequests.nodes)) {
     const a = who(p.author);
     const state = p.isDraft && p.state === "OPEN" ? "DRAFT" : p.state;
+    const actor = state === "MERGED" ? p.mergedBy : state === "CLOSED" ? p.timelineItems?.nodes?.at(-1)?.actor : p.author;
+    const eventActor = who(actor);
     out.push({
       id: `pr:${p.url}`,
       kind: "pr",
-      at: p.updatedAt,
+      at: state === "MERGED" ? (p.mergedAt ?? p.updatedAt) : state === "CLOSED" ? (p.closedAt ?? p.updatedAt) : p.updatedAt,
       created: p.createdAt,
       closed: p.closedAt,
       merged: p.mergedAt,
-      actor: a.login,
-      avatar: a.avatarUrl,
-      bot: isBot(p.author),
+      actor: eventActor.login,
+      avatar: eventActor.avatarUrl,
+      bot: isBot(actor),
       url: p.url,
       title: p.title,
       number: p.number,

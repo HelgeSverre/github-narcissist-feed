@@ -10,7 +10,9 @@ export const EVENT_TTL_DAYS = 400;
 
 export function mergeEvent(events: Record<string, FeedEvent>, e: FeedEvent) {
   const cur = events[e.id];
-  if (!cur || cur.at <= e.at) events[e.id] = e;
+  // Closed and merged PRs now use the action time, which may precede the updatedAt stored by older versions.
+  const correctedPrTime = e.kind === "pr" && (e.state === "CLOSED" || e.state === "MERGED") && cur?.state === e.state;
+  if (!cur || cur.at <= e.at || correctedPrTime) events[e.id] = e;
 }
 
 export function diffLedger(

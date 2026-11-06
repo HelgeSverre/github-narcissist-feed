@@ -37,6 +37,14 @@ describe("mergeEvent", () => {
     expect(events[stored.id]).toBe(incoming);
   });
 
+  it("replaces a cached closed PR whose old update time is later than its closure", () => {
+    const stored = makeEvent({ id: "pr:u", kind: "pr", state: "CLOSED", at: "2026-11-06T13:08:01Z", actor: "zip-fa" });
+    const corrected = makeEvent({ id: "pr:u", kind: "pr", state: "CLOSED", at: "2026-11-06T13:08:00Z", actor: "HelgeSverre" });
+    const events = { [stored.id]: stored };
+    mergeEvent(events, corrected);
+    expect(events[stored.id]).toBe(corrected);
+  });
+
   it("leaves events with other ids alone", () => {
     const other = makeEvent({ id: "star:a/b:bob" });
     const events = { [other.id]: other };

@@ -1,6 +1,6 @@
 {
   "name": "github-narcissist-feed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Your GitHub, about you: stars, forks, issues, pull requests, comments and releases on your repositories, in one Chrome tab.",
   "private": true,
   "type": "module",

@@ -3,7 +3,7 @@ export type Kind = "star" | "unstar" | "fork" | "unfork" | "issue" | "pr" | "com
 export interface FeedEvent {
   id: string;
   kind: Kind;
-  /** ISO timestamp the row is sorted by (star time, fork time, issue/PR updatedAt, comment time, …) */
+  /** ISO timestamp the row is sorted by (star/fork time, issue updatedAt, PR close/merge time or updatedAt, comment time, …) */
   at: string;
   repo: string;
   private: boolean;

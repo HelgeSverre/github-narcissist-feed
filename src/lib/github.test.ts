@@ -14,6 +14,7 @@ import {
   type PullRequestNode,
 } from "../../tests/helpers/factories";
 import { GitHubError, gql, ledgerOf, normalizeRepo, ownerMetaFrom, peopleFrom, type RepoNode } from "./github";
+import { stackEvents } from "./feed";
 import type { FeedEvent, Kind, RepoLedger } from "./types";
 
 const byKind = (events: FeedEvent[], kind: Kind) => events.filter((e) => e.kind === kind);
@@ -199,6 +200,61 @@ describe("normalizeRepo", () => {
     const stateOf = (over: Partial<PullRequestNode>) =>
       normalizeRepo(makeRepoNode({ pullRequests: { nodes: [makePullRequest(5, over)] } }), VIEWER)[0].state;
 
+    it("credits the closer when another user closes two PRs and keeps them in one stack", () => {
+      const closed = (number: number, time: string) =>
+        makePullRequest(number, {
+          author: user("zip-fa"),
+          state: "CLOSED",
+          updatedAt: time,
+          closedAt: time,
+          timelineItems: { nodes: [{ createdAt: time, actor: user(VIEWER) }] },
+        });
+      const events = normalizeRepo(
+        makeRepoNode({ pullRequests: { nodes: [closed(9, "2026-11-06T13:08:00Z"), closed(8, "2026-11-06T13:07:00Z")] } }),
+        VIEWER,
+      ).toSorted((a, b) => b.at.localeCompare(a.at));
+      expect(events.map((e) => e.actor)).toEqual([VIEWER, VIEWER]);
+      const [item] = stackEvents(events, { stack: true, stackScope: "repo", stackRepoWindow: 60, stackOrgWindow: 180 });
+      expect(item).toMatchObject({ stack: true, items: [{ single: { actor: VIEWER } }, { single: { actor: VIEWER } }] });
+    });
+
+    it("does not credit the author when the closer is unavailable", () => {
+      const [pr] = normalizeRepo(
+        makeRepoNode({ pullRequests: { nodes: [makePullRequest(9, { state: "CLOSED", author: user("zip-fa") })] } }),
+        VIEWER,
+      );
+      expect(pr.actor).toBe("ghost");
+    });
+
+    it("credits the merger rather than the PR author", () => {
+      const [pr] = normalizeRepo(
+        makeRepoNode({
+          pullRequests: { nodes: [makePullRequest(10, { state: "MERGED", author: user("zip-fa"), mergedBy: user(VIEWER) })] },
+        }),
+        VIEWER,
+      );
+      expect(pr.actor).toBe(VIEWER);
+    });
+
+    it("uses the closure time when the PR was updated later", () => {
+      const [pr] = normalizeRepo(
+        makeRepoNode({
+          pullRequests: {
+            nodes: [
+              makePullRequest(11, {
+                state: "CLOSED",
+                closedAt: "2026-11-06T13:08:00Z",
+                updatedAt: "2026-11-06T16:00:00Z",
+                timelineItems: { nodes: [{ createdAt: "2026-11-06T13:08:01Z", actor: user(VIEWER) }] },
+              }),
+            ],
+          },
+        }),
+        VIEWER,
+      );
+      expect(pr.at).toBe("2026-11-06T13:08:00Z");
+    });
+
     it("reports an open draft as DRAFT", () => {
       expect(stateOf({ state: "OPEN", isDraft: true })).toBe("DRAFT");
     });
@@ -217,7 +273,13 @@ describe("normalizeRepo", () => {
         }),
         VIEWER,
       );
-      expect(pr).toMatchObject({ kind: "pr", state: "MERGED", merged: "2026-10-21T12:00:00Z", closed: "2026-10-21T12:00:00Z" });
+      expect(pr).toMatchObject({
+        kind: "pr",
+        state: "MERGED",
+        at: "2026-10-21T12:00:00Z",
+        merged: "2026-10-21T12:00:00Z",
+        closed: "2026-10-21T12:00:00Z",
+      });
     });
   });
 
